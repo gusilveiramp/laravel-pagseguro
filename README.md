@@ -2,4 +2,6 @@
 
 Pacote de integração do sistema transparente de pagamento do PagSeguro
 
-Em desenvolvimento...
+Em desenvolvimento.
+
+Em breve instruções de uso.

@@ -1,4 +1,4 @@
-<?php namespace Giovannefc\Pagseguro;
+<?php namespace Giovannefc\PagSeguro;
 
 use Illuminate\Support\ServiceProvider;
 use App;
@@ -9,7 +9,7 @@ class PagSeguroServiceProvider extends ServiceProvider {
 	{
 		App::bind('pagseguro', function()
 		{
-			return new \Giovannefc\Pagseguro\PagSeguro;
+			return new \Giovannefc\PagSeguro\PagSeguro;
 		});
 	}
 
