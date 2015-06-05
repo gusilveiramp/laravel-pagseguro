@@ -1,0 +1,22 @@
+{
+  "name": "giovannefc/laravel-pagseguro",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Giovanne Castro",
+      "email": "giovannefc@gmail.com"
+    },
+  ],
+  "require": {
+    "php": ">=5.4.0",
+    "laravelcollective/html": "~5.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Giovannefc\\Pagseguro\\": "src/"
+    },
+    "files": [
+      "src/helpers.php"
+    ]
+  }
+}
