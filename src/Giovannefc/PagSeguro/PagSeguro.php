@@ -67,11 +67,11 @@ class PagSeguro {
 
 		$this->senderInfo = array(
 			'senderName' 		=> $senderInfo['nome'],
-        	'senderCPF'			=> str_replace(['.', '-'], '', $senderInfo['cpf']),
-        	'senderAreaCode'	=> explode(' ', $senderInfo['telefone'])[0],
-            'senderPhone' 		=> explode(' ', $senderInfo['telefone'])[1],
+			'senderCPF'			=> str_replace(['.', '-'], '', $senderInfo['cpf']),
+			'senderAreaCode'	=> explode(' ', $senderInfo['telefone'])[0],
+			'senderPhone' 		=> explode(' ', $senderInfo['telefone'])[1],
             'senderEmail' 		=> 'c30088421023915411873@sandbox.pagseguro.com.br' //$senderInfo['email']
-		);
+            );
 	}
 
 	/**
@@ -87,14 +87,14 @@ class PagSeguro {
 
 		$this->senderAddress = array(
 			'shippingAddressStreet'		=> $senderAddress['rua'],
-	        'shippingAddressNumber' 	=> $senderAddress['numero'],
-	        'shippingAddressComplement' => $senderAddress['complemento'],
-	        'shippingAddressDistrict'   => $senderAddress['bairro'],
-	        'shippingAddressPostalCode' => $senderAddress['cep'],
-	        'shippingAddressCity'		=> $senderAddress['cidade'],
-	        'shippingAddressState' 		=> $senderAddress['estado'],
-	        'shippingAddressCountry'	=> 'BRA'
-		);
+			'shippingAddressNumber' 	=> $senderAddress['numero'],
+			'shippingAddressComplement' => $senderAddress['complemento'],
+			'shippingAddressDistrict'   => $senderAddress['bairro'],
+			'shippingAddressPostalCode' => $senderAddress['cep'],
+			'shippingAddressCity'		=> $senderAddress['cidade'],
+			'shippingAddressState' 		=> $senderAddress['estado'],
+			'shippingAddressCountry'	=> 'BRA'
+			);
 	}
 
 	/**
@@ -107,14 +107,14 @@ class PagSeguro {
 	public function setItems(array $items)
 	{
 		$i = 1;
-        foreach ($items as $value) {
-            $itemsPagSeguro['itemId' . $i] = $value['id'];
-            $itemsPagSeguro['itemDescription' . $i] = $value['name'];
-            $itemsPagSeguro['itemAmount' . $i] = number_format($value['price'], 2, '.', '');
-            $itemsPagSeguro['itemQuantity' . $i++] = $value['quantity'];
-        }
+		foreach ($items as $value) {
+			$itemsPagSeguro['itemId' . $i] = $value['id'];
+			$itemsPagSeguro['itemDescription' . $i] = $value['name'];
+			$itemsPagSeguro['itemAmount' . $i] = number_format($value['price'], 2, '.', '');
+			$itemsPagSeguro['itemQuantity' . $i++] = $value['quantity'];
+		}
 
-        $this->items = $itemsPagSeguro;
+		$this->items = $itemsPagSeguro;
 
 	}
 
@@ -155,25 +155,25 @@ class PagSeguro {
 	{
 		$this->paymentSettings = array(
 			'paymentMethod' 			=> 'credit_card',
-      		'creditCardToken' 			=> $this->session->get('pagseguro.creditCardToken'),
-      		'installmentQuantity' 		=> '1',
-      		'installmentValue' 			=> number_format($totalAmount, 2, '.', ''),
-       		'creditCardHolderName' 		=> $this->session->get('pagseguro.holderName'),
-       		'creditCardHolderCPF' 		=> $this->session->get('pagseguro.holderCpf'),
-       		'creditCardHolderBirthDate' => $this->session->get('pagseguro.holderBirthDate'),
-       		'creditCardHolderAreaCode' 	=> $this->senderInfo['senderAreaCode'],
-       		'creditCardHolderPhone' 	=> $this->senderInfo['senderPhone'],
-       		'billingAddressStreet' 		=> $this->senderAddress['shippingAddressStreet'],
-       		'billingAddressNumber' 		=> $this->senderAddress['shippingAddressNumber'],
-       		'billingAddressComplement' 	=> $this->senderAddress['shippingAddressComplement'],
-       		'billingAddressDistrict' 	=> $this->senderAddress['shippingAddressDistrict'],
-       		'billingAddressPostalCode' 	=> $this->senderAddress['shippingAddressPostalCode'],
-       		'billingAddressCity' 		=> $this->senderAddress['shippingAddressCity'],
-       		'billingAddressState' 		=> $this->senderAddress['shippingAddressState'],
-       		'billingAddressCountry' 	=> 'BRA'
-		);
+			'creditCardToken' 			=> $this->session->get('pagseguro.creditCardToken'),
+			'installmentQuantity' 		=> '1',
+			'installmentValue' 			=> number_format($totalAmount, 2, '.', ''),
+			'creditCardHolderName' 		=> $this->session->get('pagseguro.holderName'),
+			'creditCardHolderCPF' 		=> $this->session->get('pagseguro.holderCpf'),
+			'creditCardHolderBirthDate' => $this->session->get('pagseguro.holderBirthDate'),
+			'creditCardHolderAreaCode' 	=> $this->senderInfo['senderAreaCode'],
+			'creditCardHolderPhone' 	=> $this->senderInfo['senderPhone'],
+			'billingAddressStreet' 		=> $this->senderAddress['shippingAddressStreet'],
+			'billingAddressNumber' 		=> $this->senderAddress['shippingAddressNumber'],
+			'billingAddressComplement' 	=> $this->senderAddress['shippingAddressComplement'],
+			'billingAddressDistrict' 	=> $this->senderAddress['shippingAddressDistrict'],
+			'billingAddressPostalCode' 	=> $this->senderAddress['shippingAddressPostalCode'],
+			'billingAddressCity' 		=> $this->senderAddress['shippingAddressCity'],
+			'billingAddressState' 		=> $this->senderAddress['shippingAddressState'],
+			'billingAddressCountry' 	=> 'BRA'
+			);
 
-	}
+}
 
 	/**
 	* envia a transação para o pagseguro usando as configurações
@@ -208,15 +208,15 @@ class PagSeguro {
 
 		$config = array(
 			'email' 					=> $this->config->get('pagseguro.email'),
-        	'token' 					=> $this->config->get('pagseguro.token'),
-        	'paymentMode' 				=> 'default',
-        	'receiverEmail' 			=> $this->config->get('pagseguro.email'),
-        	'currency' 					=> 'BRL',
-        	'reference' 				=> $this->reference,
-        	'senderHash'				=> $this->session->get('pagseguro.senderHash'),
-        	'shippingCost' 				=> $this->shippingCost
-        	
-		);
+			'token' 					=> $this->config->get('pagseguro.token'),
+			'paymentMode' 				=> 'default',
+			'receiverEmail' 			=> $this->config->get('pagseguro.email'),
+			'currency' 					=> 'BRL',
+			'reference' 				=> $this->reference,
+			'senderHash'				=> $this->session->get('pagseguro.senderHash'),
+			'shippingCost' 				=> $this->shippingCost
+			
+			);
 
 		$settings = array_merge($config, $this->senderInfo, $this->senderAddress, $this->items, $this->paymentSettings);
 
@@ -237,7 +237,7 @@ class PagSeguro {
 		$credentials = array(
 			'email' => $this->config->get('pagseguro.email'),
 			'token' => $this->config->get('pagseguro.token')
-		);
+			);
 
 		$data = '';
 		foreach ($credentials as $key => $value) {
@@ -293,10 +293,10 @@ class PagSeguro {
 	{
 		$rules = array(
 			'nome' 	=> 'required',
-        	'cpf'	=> 'required',
-        	'telefone' 	=> 'required',
-            'email'	=> 'email'
-		);
+			'cpf'	=> 'required',
+			'telefone' 	=> 'required',
+			'email'	=> 'email'
+			);
 
 		$validator = $this->validator->make($senderInfo, $rules);
 
@@ -312,13 +312,13 @@ class PagSeguro {
 	{
 		$rules = array(
 			'rua' 			=> 'required',
-        	'numero'		=> 'required',
-        	'complemento' 	=> 'required',
-            'bairro' 		=> 'required',
-            'cep'			=> 'required',
-            'cidade' 		=> 'required',
-            'estado'		=> 'required'
-		);
+			'numero'		=> 'required',
+			'complemento' 	=> 'required',
+			'bairro' 		=> 'required',
+			'cep'			=> 'required',
+			'cidade' 		=> 'required',
+			'estado'		=> 'required'
+			);
 
 		$validator = $this->validator->make($senderAddress, $rules);
 
@@ -384,71 +384,71 @@ class PagSeguro {
 			setTimeout(function(){
 				window.location.href="' . route($routeName, 'boleto') . '";
 			}, 2500);
+}
+function setSenderHash() {
+	senderHash = PagSeguroDirectPayment.getSenderHash();
+	setTimeout(function(){
+		$.post( "' . route('PagSeguroAjaxSenderHash') . '", { _token: "' . csrf_token() . '", data: (senderHash) } );
+	}, 1000);
+}
+function setInfoHolder() {
+	$.post( "' . route('PagSeguroAjaxInfoHolder') . '", {
+		_token: "' . csrf_token() . '",
+		holderName: $("#holderName").val(),
+		holderCpf: $("#holderCpf").val(),
+		holderBirthDate: $("#holderBirthDate").val()
+	});
+}'
+;
+}
+
+public function jsProcessPayment($routeName)
+{
+	return '
+
+	var parametros = {
+
+		cardNumber: $("#cardNumber").val(),
+		cvv: $("#cvv").val(),
+		expirationMonth: $("#expirationMonth :selected").val(),
+		expirationYear: $("#expirationYear :selected").val(),
+		success: function(data) {
+
+			$.post( "' . route('PagSeguroAjaxCreditCardToken') . '", { _token: "' . csrf_token() . '", data: (JSON.stringify(data.card.token).replace(/"/g, \'\')) } );
 		}
-		function setSenderHash() {
-			senderHash = PagSeguroDirectPayment.getSenderHash();
-			setTimeout(function(){
-				$.post( "' . route('PagSeguroAjaxSenderHash') . '", { _token: "' . csrf_token() . '", data: (senderHash) } );
-			}, 1000);
-		}
-		function setInfoHolder() {
-			$.post( "' . route('PagSeguroAjaxInfoHolder') . '", {
-				_token: "' . csrf_token() . '",
-				holderName: $("#holderName").val(),
-				holderCpf: $("#holderCpf").val(),
-				holderBirthDate: $("#holderBirthDate").val()
-			});
-		}'
-		;
 	}
 
-	public function jsProcessPayment($routeName)
-	{
-		return '
+	$("#confirmCartao").attr("disabled", "disabled");
+	document.getElementById("loadPagamento").style.display = "block";
 
-		var parametros = {
+	setSenderHash();
+	setInfoHolder();
+	PagSeguroDirectPayment.createCardToken(parametros);
 
-				cardNumber: $("#cardNumber").val(),
-				cvv: $("#cvv").val(),
-				expirationMonth: $("#expirationMonth :selected").val(),
-				expirationYear: $("#expirationYear :selected").val(),
-				success: function(data) {
+	setTimeout(function(){
+		window.location.href="' . route($routeName, 'credit_card') . '";
+	}, 2500);
+});'
+;
+}
 
-					$.post( "' . route('PagSeguroAjaxCreditCardToken') . '", { _token: "' . csrf_token() . '", data: (JSON.stringify(data.card.token).replace(/"/g, \'\')) } );
-				}
+public function jsGetBrand()
+{
+	return '
+
+	$("#cardNumber").blur(function() {
+		var cardNumber = document.getElementById("cardNumber").value;
+		PagSeguroDirectPayment.getBrand({
+			cardBin: cardNumber.replace(/ /g,\'\'),
+			success: function(data) {
+				var brand = JSON.stringify(data.brand.name).replace(/"/g, \'\');
+				$("#brand").fadeIn(600);
+				$("#brandName").html(brand);
 			}
-
-			$("#confirmCartao").attr("disabled", "disabled");
-			document.getElementById("loadPagamento").style.display = "block";
-
-			setSenderHash();
-			setInfoHolder();
-			PagSeguroDirectPayment.createCardToken(parametros);
-
-			setTimeout(function(){
-				window.location.href="' . route($routeName, 'credit_card') . '";
-			}, 2500);
-		});'
-		;
-	}
-
-	public function jsGetBrand()
-	{
-		return '
-
-		$("#cardNumber").blur(function() {
-			var cardNumber = document.getElementById("cardNumber").value;
-			PagSeguroDirectPayment.getBrand({
-				cardBin: cardNumber.replace(/ /g,\'\'),
-				success: function(data) {
-					var brand = JSON.stringify(data.brand.name).replace(/"/g, \'\');
-					$("#brand").fadeIn(600);
-					$("#brandName").html(brand);
-				}
-			});
-		});'
-		;
-	}
+		});
+});'
+;
+}
 
 }
 
