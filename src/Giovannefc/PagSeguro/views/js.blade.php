@@ -1,5 +1,7 @@
 <script type="text/javascript">
-function confirmBoleto() {
+
+function confirmBoleto()
+{
     $("#confirmBoleto").attr("disabled", "disabled");
     document.getElementById("loadPagamento").style.display = "block";
     senderHash = PagSeguroDirectPayment.getSenderHash();
@@ -12,8 +14,8 @@ function confirmBoleto() {
     }, 2500);
 }
 
-function confirmCartao() {
-
+function confirmCartao()
+{
     var parametros = {
 
         cardNumber: $("#cardNumber").val(),
@@ -41,7 +43,8 @@ function confirmCartao() {
     }, 2500);
 }
 
-function setSenderHash() {
+function setSenderHash()
+{
     senderHash = PagSeguroDirectPayment.getSenderHash();
     setTimeout(function() {
         $.post("{{ route('PagSeguroAjaxSenderHash') }}", {
@@ -51,7 +54,8 @@ function setSenderHash() {
     }, 1000);
 }
 
-function setInfoHolder() {
+function setInfoHolder()
+{
     $.post("{{ route('PagSeguroAjaxInfoHolder') }}", {
         _token: "{{ csrf_token() }}",
         holderName: $("#holderName").val(),
@@ -60,9 +64,11 @@ function setInfoHolder() {
     });
 }
 
-window.onload = function() {
+window.onload = function()
+{
 
-    $("#cardNumber").blur(function() {
+    $("#cardNumber").blur(function()
+    {
         var cardNumber = document.getElementById("cardNumber").value;
         PagSeguroDirectPayment.getBrand({
             cardBin: cardNumber.replace(/ /g, ''),
@@ -72,6 +78,90 @@ window.onload = function() {
                 $("#brandName").html(brand);
             }
         });
+    });
+
+    $('#formCartao').formValidation({
+        framework: 'bootstrap',
+        icon: {
+            valid: '',
+            invalid: 'glyphicon glyphicon-remove',
+            validating: 'glyphicon glyphicon-refresh'
+        },
+        fields: {
+            cardNumber: {
+                trigger: 'blur',
+                validators: {
+                    notEmpty: {
+                        message: 'Campo obrigatório.'
+                    }
+                }
+            },
+            expirationMonth: {
+                trigger: 'blur',
+                validators: {
+                    notEmpty: {
+                        message: 'Campo obrigatório.'
+                    }
+                }
+            },
+            expirationYear: {
+                trigger: 'blur',
+                validators: {
+                    notEmpty: {
+                        message: 'Campo obrigatório.'
+                    }
+                }
+            },
+            cvv: {
+                trigger: 'blur',
+                validators: {
+                    notEmpty: {
+                        message: 'Campo obrigatório.'
+                    }
+                }
+            },
+            holderName: {
+                trigger: 'blur',
+                validators: {
+                    notEmpty: {
+                        message: 'Campo obrigatório.'
+                    }
+                }
+            },
+            holderBirthDate: {
+                trigger: 'blur',
+                validators: {
+                    notEmpty: {
+                        message: 'Campo obrigatório.'
+                    },
+                    date: {
+                        format: 'DD/MM/YYYY',
+                        message: 'Preenchimento incompleto.'
+                    }
+                }
+            },
+            holderCpf: {
+                trigger: 'blur',
+                validators: {
+                    notEmpty: {
+                        message: 'Campo obrigatório.'
+                    },
+                    id: {
+                        country: 'BR',
+                        message: 'Por favor, digite um CPF válido.'
+                    }
+                }
+            },
+
+        }
+    }).on('success.form.fv', function(e) {
+        e.preventDefault();
+
+        var $form = $(e.target),
+            fv = $(e.target).data('formValidation');
+
+        confirmCartao();
+
     });
 }
 </script>

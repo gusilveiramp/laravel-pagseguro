@@ -25,7 +25,7 @@
                     </div>
                 </div>
                 <div class="check-form" id="cartao">
-                    {!! Form::open(['id' => 'formCartao', 'class' => 'form-horizontal']) !!}
+                {!! Form::open(['id' => 'formCartao', 'class' => 'form-horizontal']) !!}
                     <div class="form-group">
                         {!! Form::label('cardNumber', 'Número do Cartão', array('class' => 'col-sm-5 control-label')) !!}
                         <div class="col-sm-7">
@@ -73,9 +73,10 @@
                         </div>
                     </div>
                     <div class="text-center">
-                        <button id="confirmCartao" onclick="confirmCartao()" class="btn btn-success btn-lg"><i class="fa fa-lock"></i> Finalizar Compra</button>
+                        <button id="confirmCartao" type="submit" class="btn btn-success btn-lg"><i class="fa fa-lock"></i> Finalizar Compra</button>
                     </div>
                     {!! Form::close() !!}
+                    
                 </div>
                 <div id="loadPagamento" style="display: none" class="text-center">
                     <img src="{{ asset('vendor/pagseguro/images/load-horizontal.gif') }}">
@@ -84,6 +85,7 @@
         </div>
     </div>
 </div>
+
 <style type="text/css">
 .check-panel {
     font-size: 12px;
@@ -130,13 +132,15 @@
     margin-bottom: 20px;
 }
 </style>
+
 <script src="https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>
+
 <script type="text/javascript">
-window.onload = function() {
+	window.onload = function() {
 
     $("#boleto").hide();
 
-    $('a#boletoBtn').click(function() {
+    $('a#boletoBtn').click(function(){
         $("#cartao").hide();
         $("#boleto").fadeIn(500);
         $("#boletoNav").addClass('active');
@@ -144,12 +148,12 @@ window.onload = function() {
         return false;
     })
 
-    $('a#cartaoBtn').click(function() {
+    $('a#cartaoBtn').click(function(){
         $("#boleto").hide();
         $("#cartao").fadeIn(500);
         $("#cartaoNav").addClass('active');
         $("#boletoNav").removeClass('active');
-
+        
         return false;
     })
 
