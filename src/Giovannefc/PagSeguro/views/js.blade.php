@@ -1,4 +1,5 @@
 <script type="text/javascript">
+
 function confirmBoleto() {
     $("#confirmBoleto").attr("disabled", "disabled");
     document.getElementById("loadPagamento").style.display = "block";

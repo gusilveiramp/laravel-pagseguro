@@ -20,8 +20,7 @@
                     </div>
                     <div class="alert alert-info">
                         <strong><i class="fa fa-info-circle"></i> Aviso!</strong>
-                        <br> Pagamento em boleto leva de 1 a 2 dias úteis para compensar no banco. O prazo de entrega é contado a partir da <strong>confirmação
-	do pagamento.</strong>
+                        <br> Pagamento em boleto leva de 1 a 2 dias úteis para compensar no banco. O prazo de entrega é contado a partir da <strong>confirmação	do pagamento.</strong>
                     </div>
                 </div>
                 <div class="check-form" id="cartao">
@@ -87,14 +86,6 @@
 </div>
 
 <style type="text/css">
-.check-panel {
-    font-size: 12px;
-    color: #7C7E82;
-}
-
-.check-panel-heading {
-    padding: 3px 15px 3px 15px;
-}
 
 .check-selos {
     margin-top: 10px;
@@ -131,6 +122,7 @@
     margin-top: 15px;
     margin-bottom: 20px;
 }
+
 </style>
 
 <script src="https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>

@@ -41,7 +41,7 @@ class PagSeguro {
 
 	public function getSessionId()
 	{
-		if ($this->session->has('pagseguro.SessionId'))
+		if ($this->session->has('pagseguro.sessionId'))
 		{
 			return $this->session->get('pagseguro.sessionId');
 		}
