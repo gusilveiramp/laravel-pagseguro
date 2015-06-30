@@ -14,6 +14,17 @@
             </div>
             <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8" style="padding-left: 0px;">
                 <div class="check-form" id="boleto">
+                    <h4 align="center"><i class="fa fa-arrow-circle-right"></i> Pagar com Boleto</h4>
+                    <div class="text-center check-btn-boleto">
+                        <button id="confirmBoleto" onclick="confirmBoleto()" class="btn btn-success btn-lg"><i class="fa fa-lock"></i> Finalizar Compra</button>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong><i class="fa fa-info-circle"></i> Aviso!</strong>
+                        <br> Pagamento em boleto leva de 1 a 2 dias úteis para compensar no banco. O prazo de entrega é contado a partir da <strong>confirmação
+	do pagamento.</strong>
+                    </div>
+                </div>
+                <div class="check-form" id="cartao">
                     {!! Form::open(['id' => 'formCartao', 'class' => 'form-horizontal']) !!}
                     <div class="form-group">
                         {!! Form::label('cardNumber', 'Número do Cartão', array('class' => 'col-sm-5 control-label')) !!}
@@ -66,25 +77,13 @@
                     </div>
                     {!! Form::close() !!}
                 </div>
-                <div class="check-form" id="cartao">
-                    <h4 align="center"><i class="fa fa-arrow-circle-right"></i> Pagar com Boleto</h4>
-                    <div class="text-center check-btn-boleto">
-                        <button id="confirmBoleto" onclick="confirmBoleto()" class="btn btn-success btn-lg"><i class="fa fa-lock"></i> Finalizar Compra</button>
-                    </div>
-                    <div class="alert alert-info">
-                        <strong><i class="fa fa-info-circle"></i> Aviso!</strong>
-                        <br> Pagamento em boleto leva de 1 a 2 dias úteis para compensar no banco. O prazo de entrega é contado a partir da <strong>confirmação
-	do pagamento.</strong>
-                    </div>
-                </div>
                 <div id="loadPagamento" style="display: none" class="text-center">
-                    <img src="{{ asset('img/load-horizontal.gif') }}">
+                    <img src="{{ asset('vendor/pagseguro/images/load-horizontal.gif') }}">
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 <style type="text/css">
 .check-panel {
     font-size: 12px;
@@ -131,15 +130,13 @@
     margin-bottom: 20px;
 }
 </style>
-
 <script src="https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>
-
 <script type="text/javascript">
-	window.onload = function() {
+window.onload = function() {
 
     $("#boleto").hide();
 
-    $('a#boletoBtn').click(function(){
+    $('a#boletoBtn').click(function() {
         $("#cartao").hide();
         $("#boleto").fadeIn(500);
         $("#boletoNav").addClass('active');
@@ -147,12 +144,12 @@
         return false;
     })
 
-    $('a#cartaoBtn').click(function(){
+    $('a#cartaoBtn').click(function() {
         $("#boleto").hide();
         $("#cartao").fadeIn(500);
         $("#cartaoNav").addClass('active');
         $("#boletoNav").removeClass('active');
-        
+
         return false;
     })
 
