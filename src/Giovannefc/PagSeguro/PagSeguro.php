@@ -382,7 +382,7 @@ class PagSeguro {
 			senderHash = PagSeguroDirectPayment.getSenderHash();
 			$.post( "'. route('PagSeguroAjaxSenderHash') . '", { _token: "' . csrf_token() . '", data: (senderHash) } );
 			setTimeout(function(){
-				window.location.href="' . route('PagSeguroSendPayment', 'boleto') . '";
+				window.location.href="' . route($routeName, 'boleto') . '";
 			}, 2500);
 		}
 		function setSenderHash() {
@@ -426,7 +426,7 @@ class PagSeguro {
 			PagSeguroDirectPayment.createCardToken(parametros);
 
 			setTimeout(function(){
-				window.location.href="' . route('PagSeguroSendPayment', 'cartao') . '";
+				window.location.href="' . route($routeName, 'credit_card') . '";
 			}, 2500);
 		});'
 		;

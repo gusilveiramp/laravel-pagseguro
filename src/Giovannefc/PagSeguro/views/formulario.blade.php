@@ -9,8 +9,8 @@
                     <li id="cartaoNav" role="presentation" class="active"><a id="cartaoBtn" href="#"><i class="fa fa-credit-card fa-2x pull-right"></i> Cartão de Crédito</a></li>
                     <li id="boletoNav" role="presentation"><a id="boletoBtn" href="#"><i class="fa fa-barcode fa-2x pull-right"></i> Boleto</a></li>
                 </ul>
-                <img class="img-responsive center-block check-selos" src="{{ asset('img/amb_seguro.png') }}">
-                <img class="img-responsive center-block check-selos" src="{{ asset('img/dir_pagseguro.png') }}">
+                <img class="img-responsive center-block check-selos" src="{{ asset('vendor/pagseguro/images/amb_seguro.png') }}">
+                <img class="img-responsive center-block check-selos" src="{{ asset('vendor/pagseguro/images/dir_pagseguro.png') }}">
             </div>
             <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8" style="padding-left: 0px;">
                 <div class="check-form" id="boleto">
@@ -131,3 +131,30 @@
     margin-bottom: 20px;
 }
 </style>
+
+<script src="https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>
+
+<script type="text/javascript">
+	window.onload = function() {
+
+    $("#boleto").hide();
+
+    $('a#boletoBtn').click(function(){
+        $("#cartao").hide();
+        $("#boleto").fadeIn(500);
+        $("#boletoNav").addClass('active');
+        $("#cartaoNav").removeClass('active');
+        return false;
+    })
+
+    $('a#cartaoBtn').click(function(){
+        $("#boleto").hide();
+        $("#cartao").fadeIn(500);
+        $("#cartaoNav").addClass('active');
+        $("#boletoNav").removeClass('active');
+        
+        return false;
+    })
+
+};
+</script>
