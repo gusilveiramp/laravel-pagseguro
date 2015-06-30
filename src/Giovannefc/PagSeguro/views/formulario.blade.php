@@ -73,7 +73,7 @@
                         </div>
                     </div>
                     <div class="text-center">
-                        <button id="confirmCartao" type="submit" class="btn btn-success btn-lg"><i class="fa fa-lock"></i> Finalizar Compra</button>
+                        <button id="confirmCartao" onclick="confirmCartao()" class="btn btn-success btn-lg"><i class="fa fa-lock"></i> Finalizar Compra</button>
                     </div>
                     {!! Form::close() !!}
                 </div>

@@ -1,5 +1,4 @@
 <script type="text/javascript">
-
 function confirmBoleto() {
     $("#confirmBoleto").attr("disabled", "disabled");
     document.getElementById("loadPagamento").style.display = "block";
@@ -10,6 +9,35 @@ function confirmBoleto() {
     });
     setTimeout(function() {
         window.location.href = "{{ route('enviaPagamento', 'boleto') }}";
+    }, 2500);
+}
+
+function confirmCartao() {
+
+    var parametros = {
+
+        cardNumber: $("#cardNumber").val(),
+        cvv: $("#cvv").val(),
+        expirationMonth: $("#expirationMonth :selected").val(),
+        expirationYear: $("#expirationYear :selected").val(),
+        success: function(data) {
+
+            $.post("{{ route('PagSeguroAjaxCreditCardToken') }}", {
+                _token: "{{ csrf_token() }}",
+                data: (JSON.stringify(data.card.token).replace(/"/g, ''))
+            });
+        }
+    }
+
+    $("#confirmCartao").attr("disabled", "disabled");
+    document.getElementById("loadPagamento").style.display = "block";
+
+    setSenderHash();
+    setInfoHolder();
+    PagSeguroDirectPayment.createCardToken(parametros);
+
+    setTimeout(function() {
+        window.location.href = "{{ route('enviaPagamento', 'credit_card') }}";
     }, 2500);
 }
 
@@ -45,33 +73,5 @@ window.onload = function() {
             }
         });
     });
-
-
-    var parametros = {
-
-        cardNumber: $("#cardNumber").val(),
-        cvv: $("#cvv").val(),
-        expirationMonth: $("#expirationMonth :selected").val(),
-        expirationYear: $("#expirationYear :selected").val(),
-        success: function(data) {
-
-            $.post("{{ route('PagSeguroAjaxCreditCardToken') }}", {
-                _token: "{{ csrf_token() }}",
-                data: (JSON.stringify(data.card.token).replace(/"/g, ''))
-            });
-        }
-    }
-
-    $("#confirmCartao").attr("disabled", "disabled");
-    document.getElementById("loadPagamento").style.display = "block";
-
-    setSenderHash();
-    setInfoHolder();
-    PagSeguroDirectPayment.createCardToken(parametros);
-
-    setTimeout(function() {
-        window.location.href = "{{ route('enviaPagamento', 'credit_card') }}";
-    }, 2500);
 }
-
 </script>
