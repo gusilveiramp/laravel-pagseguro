@@ -1,7 +1,5 @@
 <script type="text/javascript">
-
-function confirmBoleto()
-{
+function confirmBoleto() {
     $("#confirmBoleto").attr("disabled", "disabled");
     document.getElementById("loadPagamento").style.display = "block";
     senderHash = PagSeguroDirectPayment.getSenderHash();
@@ -14,8 +12,7 @@ function confirmBoleto()
     }, 2500);
 }
 
-function confirmCartao()
-{
+function confirmCartao() {
     var parametros = {
 
         cardNumber: $("#cardNumber").val(),
@@ -43,8 +40,7 @@ function confirmCartao()
     }, 2500);
 }
 
-function setSenderHash()
-{
+function setSenderHash() {
     senderHash = PagSeguroDirectPayment.getSenderHash();
     setTimeout(function() {
         $.post("{{ route('PagSeguroAjaxSenderHash') }}", {
@@ -54,8 +50,7 @@ function setSenderHash()
     }, 1000);
 }
 
-function setInfoHolder()
-{
+function setInfoHolder() {
     $.post("{{ route('PagSeguroAjaxInfoHolder') }}", {
         _token: "{{ csrf_token() }}",
         holderName: $("#holderName").val(),
@@ -64,11 +59,30 @@ function setInfoHolder()
     });
 }
 
-window.onload = function()
-{
+window.onload = function() {
 
-    $("#cardNumber").blur(function()
-    {
+    $("#boleto").hide();
+
+    $('a#boletoBtn').click(function() {
+        $("#cartao").hide();
+        $("#boleto").fadeIn(500);
+        $("#boletoNav").addClass('active');
+        $("#cartaoNav").removeClass('active');
+        return false;
+    })
+
+    $('a#cartaoBtn').click(function() {
+        $("#boleto").hide();
+        $("#cartao").fadeIn(500);
+        $("#cartaoNav").addClass('active');
+        $("#boletoNav").removeClass('active');
+
+        return false;
+    })
+
+    {!! PagSeguro::jsSetSessionId() !!}
+
+    $("#cardNumber").blur(function() {
         var cardNumber = document.getElementById("cardNumber").value;
         PagSeguroDirectPayment.getBrand({
             cardBin: cardNumber.replace(/ /g, ''),

@@ -134,28 +134,3 @@
 </style>
 
 <script src="https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>
-
-<script type="text/javascript">
-	window.onload = function() {
-
-    $("#boleto").hide();
-
-    $('a#boletoBtn').click(function(){
-        $("#cartao").hide();
-        $("#boleto").fadeIn(500);
-        $("#boletoNav").addClass('active');
-        $("#cartaoNav").removeClass('active');
-        return false;
-    })
-
-    $('a#cartaoBtn').click(function(){
-        $("#boleto").hide();
-        $("#cartao").fadeIn(500);
-        $("#cartaoNav").addClass('active');
-        $("#boletoNav").removeClass('active');
-        
-        return false;
-    })
-
-};
-</script>
