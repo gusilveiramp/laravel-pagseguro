@@ -215,7 +215,7 @@ class PagSeguro {
 			'reference' 				=> $this->reference,
 			'senderHash'				=> $this->session->get('pagseguro.senderHash'),
 			'shippingCost' 				=> $this->shippingCost
-			
+
 			);
 
 		$settings = array_merge($config, $this->senderInfo, $this->senderAddress, $this->items, $this->paymentSettings);
@@ -427,8 +427,7 @@ public function jsProcessPayment($routeName)
 
 	setTimeout(function(){
 		window.location.href="' . route($routeName, 'credit_card') . '";
-	}, 2500);
-});'
+	}, 2500);'
 ;
 }
 
