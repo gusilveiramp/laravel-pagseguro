@@ -2,7 +2,7 @@
 
 namespace Giovannefc\PagSeguro\Exceptions;
 
-class InvalidSenderInfoException extends \Exception
+class InvalidSendException extends \Exception
 {
 
 }

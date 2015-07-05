@@ -40,10 +40,10 @@
                     <div class="form-group">
                         {!! Form::label('expirationMonth', 'Validade (Mês/Ano)', array('class' => 'col-sm-5 control-label')) !!}
                         <div class="col-sm-3" style="display: inline-block">
-                            {!! Form::select('expirationMonth', $meses, null, ['id' => 'expirationMonth', 'class' => 'form-control']) !!}
+                            {!! Form::select('expirationMonth', PagSeguro::viewMesesAnos()['meses'], null, ['id' => 'expirationMonth', 'class' => 'form-control']) !!}
                         </div>
                         <div class="col-sm-3" style="display: inline-block">
-                            {!! Form::select('expirationYear', $anos, null, ['id' => 'expirationYear', 'class' => 'form-control']) !!}
+                            {!! Form::select('expirationYear', PagSeguro::viewMesesAnos()['anos'], null, ['id' => 'expirationYear', 'class' => 'form-control']) !!}
                         </div>
                     </div>
                     <div class="form-group">

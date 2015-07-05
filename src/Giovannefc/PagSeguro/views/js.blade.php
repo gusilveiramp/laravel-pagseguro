@@ -1,5 +1,7 @@
 <script type="text/javascript">
 
+<!-- Funções para executar a Rota de Pagamento -->
+
 function confirmBoleto() {
     $("#confirmBoleto").attr("disabled", "disabled");
     document.getElementById("loadPagamento").style.display = "block";
@@ -9,7 +11,7 @@ function confirmBoleto() {
         data: (senderHash)
     });
     setTimeout(function() {
-        window.location.href = "{{ route('enviaPagamento', 'boleto') }}";
+        window.location.href = "{{ route(PagSeguro::viewSendRoute(), 'boleto') }}";
     }, 2500);
 }
 
@@ -17,11 +19,13 @@ function confirmCartao() {
     var parametros = {
 
         cardNumber: $("#cardNumber").val(),
+        brand: (brand),
         cvv: $("#cvv").val(),
         expirationMonth: $("#expirationMonth :selected").val(),
         expirationYear: $("#expirationYear :selected").val(),
         success: function(data) {
 
+            //alert(JSON.stringify(data.card.token).replace(/"/g, ''));
             $.post("{{ route('PagSeguroAjaxCreditCardToken') }}", {
                 _token: "{{ csrf_token() }}",
                 data: (JSON.stringify(data.card.token).replace(/"/g, ''))
@@ -37,7 +41,7 @@ function confirmCartao() {
     PagSeguroDirectPayment.createCardToken(parametros);
 
     setTimeout(function() {
-        window.location.href = "{{ route('enviaPagamento', 'credit_card') }}";
+        window.location.href = "{{ route(PagSeguro::viewSendRoute(), 'credit_card') }}";
     }, 2500);
 }
 
@@ -88,7 +92,7 @@ window.onload = function() {
         PagSeguroDirectPayment.getBrand({
             cardBin: cardNumber.replace(/ /g, ''),
             success: function(data) {
-                var brand = JSON.stringify(data.brand.name).replace(/"/g, '');
+                brand = JSON.stringify(data.brand.name).replace(/"/g, '');
                 $("#brand").fadeIn(600);
                 $("#brandName").html(brand);
             }

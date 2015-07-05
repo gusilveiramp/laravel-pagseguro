@@ -1,13 +1,16 @@
-<?php namespace Giovannefc\PagSeguro;
+<?php
+
+namespace Giovannefc\PagSeguro;
 
 use Giovannefc\PagSeguro\Exceptions\InvalidSenderInfoException;
 use Giovannefc\PagSeguro\Exceptions\InvalidSenderAddressException;
+use Giovannefc\PagSeguro\Exceptions\InvalidSendException;
 
 class PagSeguro {
 	
-	protected $urlSession = 'https://ws.sandbox.pagseguro.uol.com.br/v2/sessions';
-	protected $urlTransactions = 'https://ws.sandbox.pagseguro.uol.com.br/v2/transactions';
-	protected $urlNotifications = 'https://ws.sandbox.pagseguro.uol.com.br/v3/transactions/notifications/';
+	protected $urlSession;
+	protected $urlTransactions;
+	protected $urlNotifications;
 
 	protected $session;
 	protected $validator;
@@ -20,6 +23,8 @@ class PagSeguro {
 	protected $items;
 	protected $reference;
 	protected $shippingCost;
+	protected $paymentMethod;
+	protected $totalAmount;
 	protected $paymentSettings;
 
 	public function __construct($session, $validator, $config)
@@ -27,6 +32,29 @@ class PagSeguro {
 		$this->session = $session;
 		$this->validator = $validator;
 		$this->config = $config;
+
+		$this->setEnvironment();
+	}
+
+	protected function setEnvironment()
+	{
+
+		$env = $this->config->get('pagseguro.env');
+
+		if ($env == 'sandbox')
+		{
+			$this->urlSession = 'https://ws.sandbox.pagseguro.uol.com.br/v2/sessions';
+			$this->urlTransactions = 'https://ws.sandbox.pagseguro.uol.com.br/v2/transactions';
+			$this->urlNotifications = 'https://ws.sandbox.pagseguro.uol.com.br/v3/transactions/notifications/';
+		}
+		elseif ($env == 'production')
+		{
+			$this->urlSession = 'https://ws.pagseguro.uol.com.br/v2/sessions';
+			$this->urlTransactions = 'https://ws.pagseguro.uol.com.br/v2/transactions';
+			$this->urlNotifications = 'https://ws.pagseguro.uol.com.br/v3/transactions/notifications/';
+		}
+
+		return $this;
 	}
 
 
@@ -72,6 +100,8 @@ class PagSeguro {
 			'senderPhone' 		=> explode(' ', $senderInfo['telefone'])[1],
             'senderEmail' 		=> 'c30088421023915411873@sandbox.pagseguro.com.br' //$senderInfo['email']
             );
+
+		return $this;
 	}
 
 	/**
@@ -92,9 +122,11 @@ class PagSeguro {
 			'shippingAddressDistrict'   => $senderAddress['bairro'],
 			'shippingAddressPostalCode' => $senderAddress['cep'],
 			'shippingAddressCity'		=> $senderAddress['cidade'],
-			'shippingAddressState' 		=> $senderAddress['estado'],
+			'shippingAddressState' 		=> $senderAddress['uf'],
 			'shippingAddressCountry'	=> 'BRA'
-			);
+		);
+
+		return $this;
 	}
 
 	/**
@@ -116,6 +148,15 @@ class PagSeguro {
 
 		$this->items = $itemsPagSeguro;
 
+		return $this;
+
+	}
+
+	public function setPaymentMethod($paymentMethod)
+	{
+		$this->paymentMethod = $paymentMethod;
+
+		return $this;
 	}
 
 	/**
@@ -125,9 +166,18 @@ class PagSeguro {
 	*
 	*/
 
+	public function setTotalAmount($totalAmount)
+	{
+		$this->totalAmount = $totalAmount;
+
+		return $this;
+	}
+
 	public function setReference($reference)
 	{
 		$this->reference = $reference;
+
+		return $this;
 	}
 
 	/**
@@ -140,40 +190,9 @@ class PagSeguro {
 	public function setShippingCost($shippingCost)
 	{
 		$this->shippingCost;
+
+		return $this;
 	}
-
-	/**
-	* define as configurações e o token do cartão de crédito
-	* caso o mesmo seja usado. se esse método não for usado
-	* será assumido o método de pagamento em boleto.
-	*
-	* @param int $totalAmount
-	*
-	*/
-
-	public function setCreditCardToken($totalAmount)
-	{
-		$this->paymentSettings = array(
-			'paymentMethod' 			=> 'credit_card',
-			'creditCardToken' 			=> $this->session->get('pagseguro.creditCardToken'),
-			'installmentQuantity' 		=> '1',
-			'installmentValue' 			=> number_format($totalAmount, 2, '.', ''),
-			'creditCardHolderName' 		=> $this->session->get('pagseguro.holderName'),
-			'creditCardHolderCPF' 		=> $this->session->get('pagseguro.holderCpf'),
-			'creditCardHolderBirthDate' => $this->session->get('pagseguro.holderBirthDate'),
-			'creditCardHolderAreaCode' 	=> $this->senderInfo['senderAreaCode'],
-			'creditCardHolderPhone' 	=> $this->senderInfo['senderPhone'],
-			'billingAddressStreet' 		=> $this->senderAddress['shippingAddressStreet'],
-			'billingAddressNumber' 		=> $this->senderAddress['shippingAddressNumber'],
-			'billingAddressComplement' 	=> $this->senderAddress['shippingAddressComplement'],
-			'billingAddressDistrict' 	=> $this->senderAddress['shippingAddressDistrict'],
-			'billingAddressPostalCode' 	=> $this->senderAddress['shippingAddressPostalCode'],
-			'billingAddressCity' 		=> $this->senderAddress['shippingAddressCity'],
-			'billingAddressState' 		=> $this->senderAddress['shippingAddressState'],
-			'billingAddressCountry' 	=> 'BRA'
-			);
-
-}
 
 	/**
 	* envia a transação para o pagseguro usando as configurações
@@ -188,7 +207,7 @@ class PagSeguro {
 
 		if (!$this->session->has('pagseguro.senderHash'))
 		{
-			throw new \Exception('SenderHash is not defined', 1);
+			throw new InvalidSendException('SenderHash is not defined', 1);
 		}
 
 		if ($this->reference === null)
@@ -201,9 +220,17 @@ class PagSeguro {
 			$this->shippingCost = '0.00';
 		}
 
-		if ($this->paymentSettings === null)
+		if ($this->paymentMethod == 'boleto')
 		{
 			$this->paymentSettings = ['paymentMethod' => 'boleto'];
+		}
+		elseif ($this->paymentMethod == 'credit_card')
+		{
+			$this->setCreditCardToken();
+		}
+		else
+		{
+			throw new InvalidSendException('paymentMethod is not valid. Use boleto or credit_card', 1);
 		}
 
 		$config = array(
@@ -215,12 +242,89 @@ class PagSeguro {
 			'reference' 				=> $this->reference,
 			'senderHash'				=> $this->session->get('pagseguro.senderHash'),
 			'shippingCost' 				=> $this->shippingCost
-
-			);
+		);
 
 		$settings = array_merge($config, $this->senderInfo, $this->senderAddress, $this->items, $this->paymentSettings);
 
 		return $this->sendTransaction($settings);
+	}
+
+	/**
+	* define as configurações e o token do cartão de crédito
+	* caso o mesmo seja usado. se esse método não for usado
+	* será assumido o método de pagamento em boleto.
+	*
+	*/
+
+	protected function setCreditCardToken()
+	{
+		if ($this->totalAmount === null)
+		{
+			throw new InvalidSendException('For credit_card paymentMethod you need define totalAmount using setTotalAmount() method.', 1);
+		}
+
+		if (!$this->session->has('pagseguro.creditCardToken'))
+		{
+			throw new InvalidSendException('creditCardToken is not defined.', 1);
+		}
+
+		$this->paymentSettings = array(
+			'paymentMethod' 			=> 'credit_card',
+			'creditCardToken' 			=> $this->session->get('pagseguro.creditCardToken'),
+			'installmentQuantity' 		=> '1',
+			'installmentValue' 			=> number_format($this->totalAmount, 2, '.', ''),
+			'creditCardHolderName' 		=> $this->session->get('pagseguro.holderName'),
+			'creditCardHolderCPF' 		=> $this->session->get('pagseguro.holderCpf'),
+			'creditCardHolderBirthDate' => $this->session->get('pagseguro.holderBirthDate'),
+			'creditCardHolderAreaCode' 	=> $this->senderInfo['senderAreaCode'],
+			'creditCardHolderPhone' 	=> $this->senderInfo['senderPhone'],
+			'billingAddressStreet' 		=> $this->senderAddress['shippingAddressStreet'],
+			'billingAddressNumber' 		=> $this->senderAddress['shippingAddressNumber'],
+			'billingAddressComplement' 	=> $this->senderAddress['shippingAddressComplement'],
+			'billingAddressDistrict' 	=> $this->senderAddress['shippingAddressDistrict'],
+			'billingAddressPostalCode' 	=> $this->senderAddress['shippingAddressPostalCode'],
+			'billingAddressCity' 		=> $this->senderAddress['shippingAddressCity'],
+			'billingAddressState' 		=> $this->senderAddress['shippingAddressState'],
+			'billingAddressCountry' 	=> 'BRA'
+		);
+
+		return $this;
+	}
+
+	/**
+	* retorna meses e anos para usar na view do formulário
+	* de pagamento para escolher a validade do cartão de
+	* crédito
+	*
+	* @return array
+	*
+	*/
+
+	public function viewMesesAnos()
+	{
+		$dados['meses'][''] = '';
+        $dados['anos'][''] = '';
+        for ($i = 1; $i <= 12; $i++) {
+            $dados['meses'][$i] = $i;
+        }
+        for ($i = 2015; $i <= 2030; $i++) {
+            $dados['anos'][$i] = $i;
+        }
+
+        return $dados;
+	}
+
+	/**
+	* Retorna o nome da rota criada e definida no config
+	* para envia o pagamento. Default: enviaPagamento
+	*
+	* @return string
+	*
+	*/
+
+	public function viewSendRoute()
+	{
+		return $this->config->get('pagseguro.send_route');
 	}
 
 	/**
@@ -237,7 +341,7 @@ class PagSeguro {
 		$credentials = array(
 			'email' => $this->config->get('pagseguro.email'),
 			'token' => $this->config->get('pagseguro.token')
-			);
+		);
 
 		$data = '';
 		foreach ($credentials as $key => $value) {
@@ -317,7 +421,7 @@ class PagSeguro {
 			'bairro' 		=> 'required',
 			'cep'			=> 'required',
 			'cidade' 		=> 'required',
-			'estado'		=> 'required'
+			'uf'			=> 'required'
 			);
 
 		$validator = $this->validator->make($senderAddress, $rules);
