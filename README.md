@@ -54,9 +54,9 @@ Coloque seu e-mail da sua conta do PagSeguro e o token.
 
 ```php
 $senderInfo = array(
-	'nome' => 'Nome e Sobrenome',
-	'cpf' => '22233344455',
-	'telefone' => '11 33884466'
+	'nome' 		=> 'Nome e Sobrenome',
+	'cpf' 		=> '22233344455',
+	'telefone' 	=> '11 33884466'
 );
 $SenderAddress = array(
 	'rua' 			=> 'Rua Fulano de Tal',
@@ -70,10 +70,10 @@ $SenderAddress = array(
 
 $items = array(
 	'item1' => [
-		'id' => '1',
-		'name' => 'Nome do Produto ou Serviço',
-		'price' => '120.50',
-		'quantity' => 1
+		'id' 		=> '1',
+		'name' 		=> 'Nome do Produto ou Serviço',
+		'price' 	=> '120.50',
+		'quantity' 	=> 1
 	]
 );
 
