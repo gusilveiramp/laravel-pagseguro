@@ -203,7 +203,7 @@ class PagSeguro {
 
 	public function setShippingCost($shippingCost)
 	{
-		$this->shippingCost;
+		$this->shippingCost = $shippingCost;
 
 		return $this;
 	}
