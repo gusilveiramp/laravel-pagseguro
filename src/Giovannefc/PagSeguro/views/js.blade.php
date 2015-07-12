@@ -24,8 +24,6 @@ function confirmCartao() {
         expirationMonth: $("#expirationMonth :selected").val(),
         expirationYear: $("#expirationYear :selected").val(),
         success: function(data) {
-
-            //alert(JSON.stringify(data.card.token).replace(/"/g, ''));
             $.post("{{ route('PagSeguroAjaxCreditCardToken') }}", {
                 _token: "{{ csrf_token() }}",
                 data: (JSON.stringify(data.card.token).replace(/"/g, ''))

@@ -10,7 +10,7 @@
                     <li id="boletoNav" role="presentation"><a id="boletoBtn" href="#"><i class="fa fa-barcode fa-2x pull-right"></i> Boleto</a></li>
                 </ul>
                 <img class="img-responsive center-block check-selos" src="{{ asset('vendor/pagseguro/images/amb_seguro.png') }}">
-                <img class="img-responsive center-block check-selos" src="{{ asset('vendor/pagseguro/images/dir_pagseguro.png') }}">
+                <img class="img-responsive center-block check-selos" src="{{ asset('vendor/pagseguro/images/selo_pagseguro.gif') }}">
             </div>
             <div class="col-xs-12 col-sm-8 col-md-8 col-lg-8" style="padding-left: 0px;">
                 <div class="check-form" id="boleto">

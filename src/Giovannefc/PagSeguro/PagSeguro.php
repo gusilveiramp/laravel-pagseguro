@@ -8,8 +8,22 @@ use Giovannefc\PagSeguro\Exceptions\InvalidSendException;
 
 class PagSeguro {
 	
+	/**
+	 * url do pagseguro para criar uma sessão
+	 * @var
+	 */
 	protected $urlSession;
+
+	/**
+	 * url do pagseguro para enviar uma transação
+	 * @var
+	 */
 	protected $urlTransactions;
+
+	/**
+	 * url do pagseguro para solicitar recebimento de notificações
+	 * @var
+	 */
 	protected $urlNotifications;
 
 	protected $session;
@@ -80,7 +94,7 @@ class PagSeguro {
 			return $this->session->get('pagseguro.sessionId');
 		}
 	}
-	
+
 
 	/**
 	* define os dados do comprador (senderInfo)
@@ -327,6 +341,52 @@ class PagSeguro {
 		return $this->config->get('pagseguro.send_route');
 	}
 
+	public function listStatus()
+	{
+		return (new PagSeguroCollection([
+			'0' => [
+				'name' => 'Sem pagamento',
+				'bs' => 'warning'
+			],
+			'1' => [
+				'name' => 'Aguardando Pagamento',
+				'bs' => 'default'
+			],
+			'2' => [
+				'name' => 'Em Análise',
+				'bs' => 'info'
+			],
+			'3' => [
+				'name' => 'Pago',
+				'bs' => 'success'
+			],
+			'4' => [
+				'name' => 'Disponível',
+				'bs' => 'default'
+			],
+			'5' => [
+				'name' => 'Em disputa',
+				'bs' => 'danger',
+			],
+			'6' => [
+				'Devolvida',
+				'bs' => 'danger'
+			],
+			'7' => [
+				'name' => 'Cancelada',
+				'bs' => 'danger'
+			],
+			'8' => [
+				'name' => 'Chargeback debitado',
+				'bs' => 'warning'
+			],
+			'9' => [
+				'name' => 'Em contestação',
+				'bs' => 'danger'
+			]
+		]));
+	}
+
 	/**
 	* envia a transação para o pagseguro e retorna
 	* um array com o resultado
@@ -357,6 +417,12 @@ class PagSeguro {
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 
+		$result = curl_exec($ch);
+
+		if ($result == 'Unauthorized' || $result == 'Forbidden') {
+			throw new \Exception($result . ': Provavelmente você precisa solicitar a liberação do pagamento transparente em sua conta.', 1);
+		}
+
 		$result = simplexml_load_string(curl_exec($ch));
 
 		$result = json_decode(json_encode($result));
@@ -364,7 +430,6 @@ class PagSeguro {
 		$this->session->put('pagseguro.sessionId', $result->id);
 
 		curl_close($ch);
-
 	}
 
 	protected function sendTransaction(array $settings) {
@@ -379,7 +444,7 @@ class PagSeguro {
 		$ch = curl_init();
 
 		curl_setopt($ch, CURLOPT_URL, $this->urlTransactions);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, ['application/x-www-form-urlencoded; charset=UTF-8']);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, ['application/x-www-form-urlencoded; charset=ISO-8859-1']);
 		curl_setopt($ch, CURLOPT_POST, count($settings));
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -390,7 +455,14 @@ class PagSeguro {
 
 		curl_close($ch);
 
-		return $result;
+		if ($result['status'])
+		{
+			return $result;
+		}
+
+		// log
+
+		return false;
 	}
 
 	protected function validateSenderInfo($senderInfo)
