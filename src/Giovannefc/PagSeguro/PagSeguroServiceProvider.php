@@ -12,8 +12,9 @@ class PagSeguroServiceProvider extends ServiceProvider {
 			$storage = $app['session'];
 			$validator = $app['validator'];
 			$config = $app['config'];
+			$log = $app['log'];
 
-			return new \Giovannefc\PagSeguro\PagSeguro($storage, $validator, $config);
+			return new \Giovannefc\PagSeguro\PagSeguro($storage, $validator, $config, $log);
 
 		});
 

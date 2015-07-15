@@ -1,5 +1,4 @@
 <?php
-
 namespace Giovannefc\PagSeguro;
 
 use Giovannefc\PagSeguro\Exceptions\InvalidSenderInfoException;
@@ -10,25 +9,26 @@ class PagSeguro {
 	
 	/**
 	 * url do pagseguro para criar uma sessão
-	 * @var
+	 * @var string
 	 */
 	protected $urlSession;
 
 	/**
 	 * url do pagseguro para enviar uma transação
-	 * @var
+	 * @var string
 	 */
 	protected $urlTransactions;
 
 	/**
 	 * url do pagseguro para solicitar recebimento de notificações
-	 * @var
+	 * @var string
 	 */
 	protected $urlNotifications;
 
 	protected $session;
 	protected $validator;
 	protected $config;
+	protected $log;
 
 	protected $pagseguroSession;
 
@@ -41,12 +41,16 @@ class PagSeguro {
 	protected $totalAmount;
 	protected $paymentSettings;
 
-	public function __construct($session, $validator, $config)
+	public function __construct($session, $validator, $config, $log)
 	{
 		$this->session = $session;
 		$this->validator = $validator;
 		$this->config = $config;
+		$this->log = $log;
 
+		/**
+		 * define o ambiente de trabalho: sandbox ou production
+		 */
 		$this->setEnvironment();
 	}
 
@@ -455,12 +459,12 @@ class PagSeguro {
 
 		curl_close($ch);
 
-		if ($result['status'])
+		if (isset($result['status']))
 		{
 			return $result;
 		}
 
-		// log
+		$this->log->error('Error sending PagSeguro transaction', ['Return:' => $result]);
 
 		return false;
 	}
