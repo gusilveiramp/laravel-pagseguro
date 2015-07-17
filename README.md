@@ -56,7 +56,7 @@ $senderInfo = array(
 	'cpf' 		=> '22233344455',
 	'telefone' 	=> '11 33884466'
 );
-$SenderAddress = array(
+$senderAddress = array(
 	'rua' 			=> 'Rua Fulano de Tal',
 	'numero' 		=> '555',
 	'complemento' 	=> 'Opcional',
@@ -76,7 +76,7 @@ $items = array(
 );
 
 PagSeguro::setSenderInfo($senderInfo)
-->setSenderAddress($SenderAddress)
+->setSenderAddress($senderAddress)
 ->setItems($items)
 ->setTotalAmount('120.50')
 ->setPaymentMethod('boleto');
