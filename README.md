@@ -13,20 +13,17 @@ Adicione no require do arquivo composer.json de seu projeto:
 E rode um:
 
 ```
-$ composer update
+$ composer update giovannefc/laravel-pagseguro
 ```
 
 Atualize o arquivo config/app.php de seu projeto, adicionando o ServiceProvider:
 ```php
-...
 Giovannefc\PagSeguro\PagSeguroServiceProvider::class,
 ```
 
 E o Facade:
 ```php
-....
 'PagSeguro' => Giovannefc\PagSeguro\PagSeguroFacade::class,
-...
 ```
 
 ## Configuração
@@ -84,6 +81,21 @@ PagSeguro::setSenderInfo($senderInfo)
 ->setTotalAmount('120.50')
 ->setPaymentMethod('boleto');
 ->send();
+```
+
+## View
+
+A view contém um formulário para pagamento com cartão de crédito e um botão para pagamento com boleto.
+O código HTML utiliza os padrões CSS do bootstrap. Então para visualizar corretamente é necessário carregar o css em seu template:
+```php
+https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css
+https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js
+```
+
+Na sua view (blade), use:
+```php
+@include('pagseguro::formulario')
+@include('pagseguro::js')
 ```
 
 Em desenvolvimento. Estou criando a documentação aos poucos enquanto vou testando o código.

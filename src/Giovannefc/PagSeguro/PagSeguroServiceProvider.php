@@ -34,7 +34,7 @@ class PagSeguroServiceProvider extends ServiceProvider
 		]);
 
 		$this->publishes([
-			__DIR__.'/assets/images' => public_path('vendor/pagseguro/images'),
+			__DIR__.'/assets/images' => public_path('assets/vendor/pagseguro/images'),
 		], 'public');
 
 		$this->loadViewsFrom(__DIR__.'/views', 'pagseguro');

@@ -363,7 +363,7 @@ class PagSeguro {
 		$rules = array(
 			'rua' 			=> 'required',
 			'numero'		=> 'required',
-			'complemento' 	=> 'required',
+			'complemento'	=> 'required',
 			'bairro' 		=> 'required',
 			'cep'			=> 'required',
 			'cidade' 		=> 'required',
