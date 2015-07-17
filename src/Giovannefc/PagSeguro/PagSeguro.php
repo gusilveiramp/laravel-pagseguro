@@ -1,134 +1,165 @@
 <?php
 namespace Giovannefc\PagSeguro;
 
-use Giovannefc\PagSeguro\Exceptions\InvalidSenderInfoException;
-use Giovannefc\PagSeguro\Exceptions\InvalidSenderAddressException;
-use Giovannefc\PagSeguro\Exceptions\InvalidSendException;
+use Giovannefc\PagSeguro\PagSeguroException;
 
 class PagSeguro {
 	
 	/**
-	 * url do pagseguro para criar uma sessão
-	 * @var string
+	 * Session instance
+	 * @var object
 	 */
-	protected $urlSession;
-
-	/**
-	 * url do pagseguro para enviar uma transação
-	 * @var string
-	 */
-	protected $urlTransactions;
-
-	/**
-	 * url do pagseguro para solicitar recebimento de notificações
-	 * @var string
-	 */
-	protected $urlNotifications;
-
 	protected $session;
+
+	/**
+	 * Validator instance
+	 * @var object
+	 */
 	protected $validator;
+
+	/**
+	 * Config instance
+	 * @var object
+	 */
 	protected $config;
-	protected $log;
 
-	protected $pagseguroSession;
+	/**
+	 * PagSeguroClient instance
+	 * @var object
+	 */
+	protected $http;
 
+	/**
+	 * informações do comprador
+	 * @var array
+	 */
 	protected $senderInfo;
+
+	/**
+	 * ambiente de trabalho (sandbox|production)
+	 * @var string
+	 */
+	protected $environment;
+
+	/**
+	 * endereço do comprador
+	 * @var array
+	 */
 	protected $senderAddress;
+
+	/**
+	 * itens da compra
+	 * @var array
+	 */
 	protected $items;
+
+	/**
+	 * id de referência da compra no pagseguro
+	 * @var string
+	 */
 	protected $reference;
+
+	/**
+	 * valor do frete da compra
+	 * @var float
+	 */
 	protected $shippingCost;
+
+	/**
+	 * forma de pagamento da compra
+	 * @var string
+	 */
 	protected $paymentMethod;
+
+	/**
+	 * valor total da compra
+	 * @var float
+	 */
 	protected $totalAmount;
+
+	/**
+	 * configurações da compra
+	 * @var array
+	 */
 	protected $paymentSettings;
 
-	public function __construct($session, $validator, $config, $log)
+	/**
+	 * object constructor
+	 * @param $session
+	 * @param $validator
+	 * @param $config
+	 * @param $log
+	 */
+	public function __construct($session, $validator, $config, $http)
 	{
 		$this->session = $session;
 		$this->validator = $validator;
 		$this->config = $config;
-		$this->log = $log;
+		$this->http = $http;
 
-		/**
-		 * define o ambiente de trabalho: sandbox ou production
-		 */
 		$this->setEnvironment();
 	}
 
+	/**
+	 * define o ambiente de trabalho
+	 */
 	protected function setEnvironment()
 	{
-
 		$env = $this->config->get('pagseguro.env');
 
-		if ($env == 'sandbox')
-		{
-			$this->urlSession = 'https://ws.sandbox.pagseguro.uol.com.br/v2/sessions';
-			$this->urlTransactions = 'https://ws.sandbox.pagseguro.uol.com.br/v2/transactions';
-			$this->urlNotifications = 'https://ws.sandbox.pagseguro.uol.com.br/v3/transactions/notifications/';
+		if ($env == 'sandbox') {
+			$this->environment = $env;
+		} elseif ($env == 'production') {
+			$this->environment = $env;
+		} else {
+			throw new PagSeguroException('Invalid environment. Use sandbox or production', 1);
 		}
-		elseif ($env == 'production')
-		{
-			$this->urlSession = 'https://ws.pagseguro.uol.com.br/v2/sessions';
-			$this->urlTransactions = 'https://ws.pagseguro.uol.com.br/v2/transactions';
-			$this->urlNotifications = 'https://ws.pagseguro.uol.com.br/v3/transactions/notifications/';
-		}
-
-		return $this;
 	}
-
 
 	/**
 	* retorna o id da sessão do pagseguro
 	* caso ainda não exista, é executado o método
 	* setSessionId() e é retornado o id da sessão
-	* 
 	* @return string
-	*
 	*/
-
 	public function getSessionId()
 	{
-		if ($this->session->has('pagseguro.sessionId'))
-		{
+		if ($this->session->has('pagseguro.sessionId'))	{
 			return $this->session->get('pagseguro.sessionId');
-		}
-		else
-		{
-			$this->setSessionId();
-
-			return $this->session->get('pagseguro.sessionId');
+		} else {
+			return $this->http->setSessionId();
 		}
 	}
 
-
 	/**
-	* define os dados do comprador (senderInfo)
-	* 
-	* @param string|array $senderInfo
-	*
+	* define os dados do comprador
+	* @param array $senderInfo
 	*/
-
 	public function setSenderInfo(array $senderInfo)
 	{
 		$senderInfo = $this->validateSenderInfo($senderInfo);
+
+		if ($this->environment == 'sandbox') {
+			$senderEmail = 'teste@sandbox.pagseguro.com.br';
+		} else {
+			$senderEmail = $senderInfo['email'];
+		}
 
 		$this->senderInfo = array(
 			'senderName' 		=> $senderInfo['nome'],
 			'senderCPF'			=> str_replace(['.', '-'], '', $senderInfo['cpf']),
 			'senderAreaCode'	=> explode(' ', $senderInfo['telefone'])[0],
 			'senderPhone' 		=> explode(' ', $senderInfo['telefone'])[1],
-            'senderEmail' 		=> 'c30088421023915411873@sandbox.pagseguro.com.br' //$senderInfo['email']
-            );
+            'senderEmail' 		=> $senderEmail
+        );
 
 		return $this;
 	}
 
 	/**
-	* define o endereço do comprador (senderAddress)
-	* 
-	* @param string|array $senderAddress
-	*
+	* define o endereço do comprador
+	* @param array $senderAddress
 	*/
-
 	public function setSenderAddress(array $senderAddress)
 	{
 		$senderAddress = $this->validateSenderAddress($senderAddress);
@@ -148,12 +179,9 @@ class PagSeguro {
 	}
 
 	/**
-	* define os items da compra
-	* 
-	* @param string|array $items
-	*
+	* define os itens da compra
+	* @param array $items
 	*/
-
 	public function setItems(array $items)
 	{
 		$i = 1;
@@ -167,9 +195,12 @@ class PagSeguro {
 		$this->items = $itemsPagSeguro;
 
 		return $this;
-
 	}
 
+	/**
+	 * define a forma de pagamento
+	 * @param string $paymentMethod
+	 */
 	public function setPaymentMethod($paymentMethod)
 	{
 		$this->paymentMethod = $paymentMethod;
@@ -178,12 +209,9 @@ class PagSeguro {
 	}
 
 	/**
-	* define um valor de referência da transação no pagseguro
-	*
-	* @param int $reference
-	*
+	* define o valor total da compra
+	* @param float $totalAmount
 	*/
-
 	public function setTotalAmount($totalAmount)
 	{
 		$this->totalAmount = $totalAmount;
@@ -191,6 +219,10 @@ class PagSeguro {
 		return $this;
 	}
 
+	/**
+	 * define um id de referência da compra no pagseguro
+	 * @param string $reference
+	 */
 	public function setReference($reference)
 	{
 		$this->reference = $reference;
@@ -200,9 +232,7 @@ class PagSeguro {
 
 	/**
 	* define o valor do frete cobrado
-	*
-	* @param int $shippingCost
-	*
+	* @param float $shippingCost
 	*/
 
 	public function setShippingCost($shippingCost)
@@ -215,17 +245,14 @@ class PagSeguro {
 	/**
 	* envia a transação para o pagseguro usando as configurações
 	* setadas nos métodos e retorna um array com o resultado
-	*
 	* @return array
-	*
 	*/
-
 	public function send()
 	{
 
 		if (!$this->session->has('pagseguro.senderHash'))
 		{
-			throw new InvalidSendException('SenderHash is not defined', 1);
+			throw new PagSeguroException('SenderHash is not defined', 1);
 		}
 
 		if ($this->reference === null)
@@ -238,17 +265,12 @@ class PagSeguro {
 			$this->shippingCost = '0.00';
 		}
 
-		if ($this->paymentMethod == 'boleto')
-		{
+		if ($this->paymentMethod == 'boleto') {
 			$this->paymentSettings = ['paymentMethod' => 'boleto'];
-		}
-		elseif ($this->paymentMethod == 'credit_card')
-		{
+		} elseif ($this->paymentMethod == 'credit_card') {
 			$this->setCreditCardToken();
-		}
-		else
-		{
-			throw new InvalidSendException('paymentMethod is not valid. Use boleto or credit_card', 1);
+		} else {
+			throw new PagSeguroException('paymentMethod is not valid. Use boleto or credit_card', 1);
 		}
 
 		$config = array(
@@ -264,26 +286,29 @@ class PagSeguro {
 
 		$settings = array_merge($config, $this->senderInfo, $this->senderAddress, $this->items, $this->paymentSettings);
 
-		return $this->sendTransaction($settings);
+		return $this->http->sendTransaction($settings);
+	}
+
+	public function clear()
+	{
+		$this->session->forget('pagseguro');
 	}
 
 	/**
 	* define as configurações e o token do cartão de crédito
 	* caso o mesmo seja usado. se esse método não for usado
 	* será assumido o método de pagamento em boleto.
-	*
 	*/
-
 	protected function setCreditCardToken()
 	{
 		if ($this->totalAmount === null)
 		{
-			throw new InvalidSendException('For credit_card paymentMethod you need define totalAmount using setTotalAmount() method.', 1);
+			throw new PagSeguroException('For credit_card paymentMethod you need define totalAmount using setTotalAmount() method.', 1);
 		}
 
 		if (!$this->session->has('pagseguro.creditCardToken'))
 		{
-			throw new InvalidSendException('creditCardToken is not defined.', 1);
+			throw new PagSeguroException('creditCardToken is not defined.', 1);
 		}
 
 		$this->paymentSettings = array(
@@ -309,42 +334,76 @@ class PagSeguro {
 		return $this;
 	}
 
-	/**
-	* retorna meses e anos para usar na view do formulário
-	* de pagamento para escolher a validade do cartão de
-	* crédito
-	*
-	* @return array
-	*
-	*/
-
-	public function viewMesesAnos()
+	protected function validateSenderInfo($senderInfo)
 	{
-		$dados['meses'][''] = '';
-        $dados['anos'][''] = '';
-        for ($i = 1; $i <= 12; $i++) {
-            $dados['meses'][$i] = $i;
-        }
-        for ($i = 2015; $i <= 2030; $i++) {
-            $dados['anos'][$i] = $i;
-        }
+		$rules = array(
+			'nome' 	=> 'required',
+			'email'	=> 'required|email',
+			'cpf'	=> 'required',
+			'telefone' 	=> 'required'
+		);
 
-        return $dados;
+		$validator = $this->validator->make($senderInfo, $rules);
+
+		if ($validator->fails())
+		{
+			throw new PagSeguroException($validator->messages()->first());
+		}
+
+		return $senderInfo;
 	}
 
 	/**
-	* Retorna o nome da rota criada e definida no config
-	* para envia o pagamento. Default: enviaPagamento
-	*
-	* @return string
-	*
-	*/
-
-	public function viewSendRoute()
+	 * valida os dados contidos na array de endereço do comprador
+	 * @param  array $senderAddress
+	 * @return array
+	 */
+	protected function validateSenderAddress($senderAddress)
 	{
-		return $this->config->get('pagseguro.send_route');
+		$rules = array(
+			'rua' 			=> 'required',
+			'numero'		=> 'required',
+			'complemento' 	=> 'required',
+			'bairro' 		=> 'required',
+			'cep'			=> 'required',
+			'cidade' 		=> 'required',
+			'uf'			=> 'required'
+		);
+
+		$validator = $this->validator->make($senderAddress, $rules);
+
+		if ($validator->fails())
+		{
+			throw new PagSeguroException($validator->messages()->first());
+		}
+
+		return $senderAddress;
 	}
 
+	/**
+	 * monta a url para retorna uma mudança de status do pedido
+	 * @param  string $code
+	 * @param  string $type
+	 * @return string
+	 */
+	public function getNotifications($code, $type)
+	{
+
+		$url = $this->urlNotifications . $code
+		. '?email=' . $this->config->get('pagseguro.email')
+		. '&token=' . $this->config->get('pagseguro.token');
+
+		$result = simplexml_load_string(file_get_contents($url));
+
+		$result = json_decode(json_encode($result));
+
+		return $result;
+	}
+
+	/**
+	 * retorna os códigos de status do pedido do pagseguro
+	 * @return mixed
+	 */
 	public function listStatus()
 	{
 		return (new PagSeguroCollection([
@@ -373,7 +432,7 @@ class PagSeguro {
 				'bs' => 'danger',
 			],
 			'6' => [
-				'Devolvida',
+				'name' => 'Devolvida',
 				'bs' => 'danger'
 			],
 			'7' => [
@@ -392,161 +451,40 @@ class PagSeguro {
 	}
 
 	/**
-	* envia a transação para o pagseguro e retorna
-	* um array com o resultado
-	*
+	* retorna meses e anos para usar na view do formulário
+	* de pagamento para escolher a validade do cartão de
+	* crédito
 	* @return array
-	*
+	*/
+	public function viewMesesAnos()
+	{
+		$dados['meses'][''] = '';
+        $dados['anos'][''] = '';
+        for ($i = 1; $i <= 12; $i++) {
+            $dados['meses'][$i] = $i;
+        }
+        for ($i = 2015; $i <= 2030; $i++) {
+            $dados['anos'][$i] = $i;
+        }
+
+        return $dados;
+	}
+
+	/**
+	* retorna o nome da rota criada e definida no config
+	* para envia o pagamento. Default: sendPayment
+	* @return string
 	*/
 
-	protected function setSessionId()
+	public function viewSendRoute()
 	{
-
-		$credentials = array(
-			'email' => $this->config->get('pagseguro.email'),
-			'token' => $this->config->get('pagseguro.token')
-		);
-
-		$data = '';
-		foreach ($credentials as $key => $value) {
-			$data .= $key . '=' . $value . '&';
-		}
-
-		$data = rtrim($data, '&');
-
-		$ch = curl_init();
-
-		curl_setopt($ch, CURLOPT_URL, $this->urlSession);
-		curl_setopt($ch, CURLOPT_POST, count($credentials));
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-		$result = curl_exec($ch);
-
-		if ($result == 'Unauthorized' || $result == 'Forbidden') {
-			throw new \Exception($result . ': Provavelmente você precisa solicitar a liberação do pagamento transparente em sua conta.', 1);
-		}
-
-		$result = simplexml_load_string(curl_exec($ch));
-
-		$result = json_decode(json_encode($result));
-
-		$this->session->put('pagseguro.sessionId', $result->id);
-
-		curl_close($ch);
+		return $this->config->get('pagseguro.send_route');
 	}
 
-	protected function sendTransaction(array $settings) {
-
-		$data = '';
-		foreach ($settings as $key => $value) {
-			$data .= $key . '=' . $value . '&';
-		}
-
-		$data = rtrim($data, '&');
-
-		$ch = curl_init();
-
-		curl_setopt($ch, CURLOPT_URL, $this->urlTransactions);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, ['application/x-www-form-urlencoded; charset=ISO-8859-1']);
-		curl_setopt($ch, CURLOPT_POST, count($settings));
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-
-		$result = simplexml_load_string(curl_exec($ch));
-
-		$result = json_decode(json_encode($result), true);
-
-		curl_close($ch);
-
-		if (isset($result['status']))
-		{
-			return $result;
-		}
-
-		$this->log->error('Error sending PagSeguro transaction', ['Return:' => $result]);
-
-		return false;
-	}
-
-	protected function validateSenderInfo($senderInfo)
-	{
-		$rules = array(
-			'nome' 	=> 'required',
-			'cpf'	=> 'required',
-			'telefone' 	=> 'required',
-			'email'	=> 'email'
-			);
-
-		$validator = $this->validator->make($senderInfo, $rules);
-
-		if ($validator->fails())
-		{
-			throw new InvalidSenderInfoException($validator->messages()->first());
-		}
-
-		return $senderInfo;
-	}
-
-	protected function validateSenderAddress($senderAddress)
-	{
-		$rules = array(
-			'rua' 			=> 'required',
-			'numero'		=> 'required',
-			'complemento' 	=> 'required',
-			'bairro' 		=> 'required',
-			'cep'			=> 'required',
-			'cidade' 		=> 'required',
-			'uf'			=> 'required'
-			);
-
-		$validator = $this->validator->make($senderAddress, $rules);
-
-		if ($validator->fails())
-		{
-			throw new InvalidSenderAddressException($validator->messages()->first());
-		}
-
-		return $senderAddress;
-	}
-
-	protected function getSession()
-	{
-
-		return (new PagSeguroCollection($this->session->get('pagseguro')));
-	}
-
-	public function clear() {
-
-		$this->session->forget('pagseguro');
-
-	}
-
-	public function getNotifications($code, $type) {
-
-		$url = $this->urlNotifications . $code
-		. '?email=' . $this->config->get('pagseguro.email')
-		. '&token=' . $this->config->get('pagseguro.token');
-
-		$result = simplexml_load_string(file_get_contents($url));
-
-		$result = json_decode(json_encode($result));
-
-		return $result;
-
-	}
-
-	public function getPaymentMethods() {
-
-		// Retorna em array
-
-		$json = $this->session->get('pagseguro.paymentMethods');
-
-		return json_decode($json, true);
-	}
-
-	// Javascript Functions
-
+	/**
+	 * retorna a função em javascript para inciar a sessão no pagseguro
+	 * @return string
+	 */
 	public function jsSetSessionId()
 	{
 		return 'PagSeguroDirectPayment.setSessionId(\'' . $this->getSessionId() . '\');';

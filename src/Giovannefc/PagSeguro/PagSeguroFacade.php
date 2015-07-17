@@ -1,4 +1,5 @@
-<?php namespace Giovannefc\PagSeguro;
+<?php
+namespace Giovannefc\PagSeguro;
 
 use Illuminate\Support\Facades\Facade;
 

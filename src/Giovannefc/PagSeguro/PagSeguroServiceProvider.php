@@ -1,30 +1,31 @@
-<?php namespace Giovannefc\PagSeguro;
+<?php
+namespace Giovannefc\PagSeguro;
 
 use Illuminate\Support\ServiceProvider;
 
-class PagSeguroServiceProvider extends ServiceProvider {
+class PagSeguroServiceProvider extends ServiceProvider
+{
 
 	public function register()
 	{
 
 		$this->app['pagseguro'] = $this->app->share(function($app)
 		{
-			$storage = $app['session'];
+			$session = $app['session'];
 			$validator = $app['validator'];
 			$config = $app['config'];
 			$log = $app['log'];
 
-			return new \Giovannefc\PagSeguro\PagSeguro($storage, $validator, $config, $log);
+			$http = new \Giovannefc\PagSeguro\PagSeguroClient($session, $config, $log);
 
+			return new \Giovannefc\PagSeguro\PagSeguro($session, $validator, $config, $http);
 		});
-
 	}
 
 	public function boot()
 	{
 
-		if (! $this->app->routesAreCached())
-		{
+		if (! $this->app->routesAreCached()) {
 			require __DIR__.'/routes.php';
 		}
 
@@ -37,7 +38,5 @@ class PagSeguroServiceProvider extends ServiceProvider {
 		], 'public');
 
 		$this->loadViewsFrom(__DIR__.'/views', 'pagseguro');
-
 	}
-
 }

@@ -14,6 +14,6 @@ return [
 	* Define a route que vai chamar a função que envia o pagamento (send)
 	*/
 
-	'send_route' => env('PAGSEGURO_SENDROUTE', 'enviaPagamento')
+	'send_route' => env('PAGSEGURO_SENDROUTE', 'sendPayment')
 
 ];

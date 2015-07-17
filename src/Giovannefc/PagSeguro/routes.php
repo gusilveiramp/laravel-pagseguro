@@ -4,7 +4,6 @@
 |--------------------------------------------------------------------------
 | PagSeguro Laravel 5 Routes
 |--------------------------------------------------------------------------
-|
 */
 
 Route::get('/services/pagseguro/get/payment-methods', ['as' => 'getPaymentMethods', function(){

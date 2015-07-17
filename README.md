@@ -55,6 +55,7 @@ Coloque seu e-mail da sua conta do PagSeguro e o token.
 ```php
 $senderInfo = array(
 	'nome' 		=> 'Nome e Sobrenome',
+	'email'		=> 'email@provedor.com'
 	'cpf' 		=> '22233344455',
 	'telefone' 	=> '11 33884466'
 );
