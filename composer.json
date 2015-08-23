@@ -11,7 +11,8 @@
     ],
     "require": {
         "php": ">=5.5.9",
-        "laravelcollective/html": "5.1.*"
+        "laravelcollective/html": "5.1.*",
+        "watson/bootstrap-form": "dev-master"
     },
     "autoload": {
         "psr-4": {
