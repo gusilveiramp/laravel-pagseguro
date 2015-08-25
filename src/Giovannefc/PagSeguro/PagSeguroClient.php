@@ -21,7 +21,7 @@ class PagSeguroClient
 	 * url do pagseguro para solicitar recebimento de notificações
 	 * @var string
 	 */
-	protected $urlNotifications;
+	public $urlNotifications;
 
 	/**
 	 * Session instance
