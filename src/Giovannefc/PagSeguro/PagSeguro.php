@@ -378,7 +378,7 @@ class PagSeguro
     public function getNotifications($code, $type)
     {
 
-        $url = $this->urlNotifications . $code
+        $url = $this->http->urlNotifications . $code
             . '?email=' . $this->config->get('pagseguro.email')
             . '&token=' . $this->config->get('pagseguro.token');
 
