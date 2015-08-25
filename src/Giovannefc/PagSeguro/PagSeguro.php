@@ -369,24 +369,9 @@ class PagSeguro
         $this->session->forget('pagseguro');
     }
 
-    /**
-     * monta a url para retorna uma mudança de status do pedido
-     * @param  string $code
-     * @param  string $type
-     * @return string
-     */
     public function getNotifications($code, $type)
     {
-
-        $url = $this->http->urlNotifications . $code
-            . '?email=' . $this->config->get('pagseguro.email')
-            . '&token=' . $this->config->get('pagseguro.token');
-
-        $result = simplexml_load_string(file_get_contents($url));
-
-        $result = json_decode(json_encode($result));
-
-        return $result;
+        return $this->http->getNotifications($code, $type);
     }
 
     /**
