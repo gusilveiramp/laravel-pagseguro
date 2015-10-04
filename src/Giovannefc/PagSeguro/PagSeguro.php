@@ -73,12 +73,6 @@ class PagSeguro
     protected $totalAmount;
 
     /**
-     * dados do cartão de crédito
-     * @var array
-     */
-    protected $creditcardData;
-
-    /**
      * configurações da compra
      * @var array
      */
@@ -287,8 +281,8 @@ class PagSeguro
             'creditCardToken' => $data['cardToken'],
             'installmentQuantity' => '1',
             'installmentValue' => number_format($this->totalAmount, 2, '.', ''),
-            'creditCardHolderName' => $this->session->get('pagseguro.holderName'),
-            'creditCardHolderCPF' => $this->session->get('pagseguro.holderCpf'),
+            'creditCardHolderName' => $data['pagseguro.holderName'],
+            'creditCardHolderCPF' => $data['holderCpf'],
             'creditCardHolderBirthDate' => $data['holderBirthDate'],
             'creditCardHolderAreaCode' => $this->senderInfo['senderAreaCode'],
             'creditCardHolderPhone' => $this->senderInfo['senderPhone'],
@@ -341,11 +335,11 @@ class PagSeguro
         }
     }
 
-    public function sendBillet($senderHash)
+    public function sendBillet($data)
     {
         $this->paymentSettings = array(
             'paymentMethod' => 'boleto',
-            'senderHash' => $senderHash
+            'senderHash' => $data['senderHash']
         );
 
         return $this->send();
