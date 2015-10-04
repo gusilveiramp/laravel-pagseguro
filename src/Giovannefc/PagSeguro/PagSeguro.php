@@ -1,46 +1,13 @@
 <?php
 namespace Giovannefc\PagSeguro;
 
-use Giovannefc\PagSeguro\PagSeguroException;
-
-class PagSeguro
+class PagSeguro extends PagSeguroClient
 {
-
-    /**
-     * Session instance
-     * @var object
-     */
-    protected $session;
-
-    /**
-     * Validator instance
-     * @var object
-     */
-    protected $validator;
-
-    /**
-     * Config instance
-     * @var object
-     */
-    protected $config;
-
-    /**
-     * PagSeguroClient instance
-     * @var object
-     */
-    protected $http;
-
     /**
      * informações do comprador
      * @var array
      */
     protected $senderInfo;
-
-    /**
-     * ambiente de trabalho (sandbox|production)
-     * @var string
-     */
-    protected $environment;
 
     /**
      * endereço do comprador
@@ -79,41 +46,6 @@ class PagSeguro
     protected $paymentSettings;
 
     /**
-     * object constructor
-     * @param $session
-     * @param $validator
-     * @param $config
-     * @param $http
-     * @throws \Giovannefc\PagSeguro\PagSeguroException
-     * @internal param $log
-     */
-    public function __construct($session, $validator, $config, $http)
-    {
-        $this->session = $session;
-        $this->validator = $validator;
-        $this->config = $config;
-        $this->http = $http;
-
-        $this->setEnvironment();
-    }
-
-    /**
-     * define o ambiente de trabalho
-     */
-    protected function setEnvironment()
-    {
-        $env = $this->config->get('pagseguro.env');
-
-        if ($env == 'sandbox') {
-            $this->environment = $env;
-        } elseif ($env == 'production') {
-            $this->environment = $env;
-        } else {
-            throw new PagSeguroException('Invalid environment. Use sandbox or production', 1);
-        }
-    }
-
-    /**
      * define os dados do comprador
      * @param array $senderInfo
      * @return $this
@@ -122,10 +54,10 @@ class PagSeguro
     {
         $senderInfo = $this->validateSenderInfo($senderInfo);
 
-        if ($this->environment == 'sandbox') {
-            $senderEmail = 'teste@sandbox.pagseguro.com.br';
-        } else {
+        if (app()->environment('production')) {
             $senderEmail = $senderInfo['email'];
+        } else {
+            $senderEmail = 'teste@sandbox.pagseguro.com.br';
         }
 
         $this->senderInfo = array(
@@ -281,7 +213,7 @@ class PagSeguro
             'creditCardToken' => $data['cardToken'],
             'installmentQuantity' => '1',
             'installmentValue' => number_format($this->totalAmount, 2, '.', ''),
-            'creditCardHolderName' => $data['pagseguro.holderName'],
+            'creditCardHolderName' => $data['holderName'],
             'creditCardHolderCPF' => $data['holderCpf'],
             'creditCardHolderBirthDate' => $data['holderBirthDate'],
             'creditCardHolderAreaCode' => $this->senderInfo['senderAreaCode'],
@@ -307,10 +239,10 @@ class PagSeguro
         $this->validate();
 
         $config = array(
-            'email' => $this->config->get('pagseguro.email'),
-            'token' => $this->config->get('pagseguro.token'),
+            'email' => $this->email,
+            'token' => $this->token,
             'paymentMode' => 'default',
-            'receiverEmail' => $this->config->get('pagseguro.email'),
+            'receiverEmail' => $this->email,
             'currency' => 'BRL',
             'reference' => $this->reference,
             'shippingCost' => $this->shippingCost
@@ -318,7 +250,7 @@ class PagSeguro
 
         $settings = array_merge($config, $this->senderInfo, $this->senderAddress, $this->items, $this->paymentSettings);
 
-        return $this->http->sendTransaction($settings);
+        return $this->sendTransaction($settings);
     }
 
     /**
@@ -352,7 +284,7 @@ class PagSeguro
 
     public function getNotifications($code, $type)
     {
-        return $this->http->getNotifications($code, $type);
+        return $this->getNotifications($code, $type);
     }
 
     /**
@@ -456,8 +388,7 @@ class PagSeguro
         if ($this->session->has('pagseguro.sessionId')) {
             return $this->session->get('pagseguro.sessionId');
         } else {
-            return $this->http->setSessionId();
+            return $this->setSessionId();
         }
     }
-
 }

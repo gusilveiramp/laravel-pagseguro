@@ -1,92 +1,19 @@
 <?php
 namespace Giovannefc\PagSeguro;
 
-use Giovannefc\PagSeguro\PagSeguroException;
-
-class PagSeguroClient
+class PagSeguroClient extends PagSeguroConfig
 {
     /**
-     * url do pagseguro para criar uma sessão
-     * @var string
-     */
-    protected $urlSession;
-
-    /**
-     * url do pagseguro para enviar uma transação
-     * @var string
-     */
-    protected $urlTransactions;
-
-    /**
-     * url do pagseguro para solicitar recebimento de notificações
-     * @var string
-     */
-    protected $urlNotifications;
-
-    /**
-     * Session instance
-     * @var object
-     */
-    protected $session;
-
-    /**
-     * Config instance
-     * @var object
-     */
-    protected $config;
-
-    /**
-     * Log instance
-     * @var object
-     */
-    protected $log;
-
-    /**
-     * object constructor
-     * @param $session
-     * @param $validator
-     * @param $config
-     * @param $log
-     */
-    public function __construct($session, $config, $log)
-    {
-        $this->session = $session;
-        $this->config = $config;
-        $this->log = $log;
-
-        $this->setUrl();
-    }
-
-
-    /**
-     * define o ambiente de trabalho: sandbox ou production
-     */
-    protected function setUrl()
-    {
-
-        $env = $this->config->get('pagseguro.env');
-
-        if ($env == 'sandbox') {
-            $this->urlSession = 'https://ws.sandbox.pagseguro.uol.com.br/v2/sessions';
-            $this->urlTransactions = 'https://ws.sandbox.pagseguro.uol.com.br/v2/transactions';
-            $this->urlNotifications = 'https://ws.sandbox.pagseguro.uol.com.br/v3/transactions/notifications/';
-        } elseif ($env == 'production') {
-            $this->urlSession = 'https://ws.pagseguro.uol.com.br/v2/sessions';
-            $this->urlTransactions = 'https://ws.pagseguro.uol.com.br/v2/transactions';
-            $this->urlNotifications = 'https://ws.pagseguro.uol.com.br/v3/transactions/notifications/';
-        }
-    }
-
-    /**
-     * coloca o id de sessão do pagseguro na sessão
-     * @return  string
+     * Coloca o sessionId do PagSeguro na sessão
+     * @return mixed
+     * @throws \Giovannefc\PagSeguro\PagSeguroException
      */
     public function setSessionId()
     {
 
         $credentials = array(
-            'email' => $this->config->get('pagseguro.email'),
-            'token' => $this->config->get('pagseguro.token')
+            'email' => $this->email,
+            'token' => $this->token
         );
 
         $data = '';
@@ -98,7 +25,7 @@ class PagSeguroClient
 
         $ch = curl_init();
 
-        curl_setopt($ch, CURLOPT_URL, $this->urlSession);
+        curl_setopt($ch, CURLOPT_URL, $this->url['session']);
         curl_setopt($ch, CURLOPT_POST, count($credentials));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
@@ -121,9 +48,8 @@ class PagSeguroClient
     }
 
     /**
-     * envia a transação para o pagseguro e retorna
-     * um array com o resultado
-     * @return array|false
+     * @param array $settings
+     * @return bool|mixed|\SimpleXMLElement
      */
     public function sendTransaction(array $settings)
     {
@@ -137,7 +63,7 @@ class PagSeguroClient
 
         $ch = curl_init();
 
-        curl_setopt($ch, CURLOPT_URL, $this->urlTransactions);
+        curl_setopt($ch, CURLOPT_URL, $this->url['transactions']);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['application/x-www-form-urlencoded; charset=ISO-8859-1']);
         curl_setopt($ch, CURLOPT_POST, count($settings));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
@@ -167,9 +93,9 @@ class PagSeguroClient
     public function getNotifications($code, $type)
     {
 
-        $url = $this->urlNotifications . $code
-            . '?email=' . $this->config->get('pagseguro.email')
-            . '&token=' . $this->config->get('pagseguro.token');
+        $url = $this->url['notifications'] . $code
+            . '?email=' . $this->email
+            . '&token=' . $this->token;
 
         $result = simplexml_load_string(file_get_contents($url));
 
