@@ -67,16 +67,16 @@ class PagSeguro
     protected $shippingCost;
 
     /**
-     * forma de pagamento da compra
-     * @var string
-     */
-    protected $paymentMethod;
-
-    /**
      * valor total da compra
      * @var float
      */
     protected $totalAmount;
+
+    /**
+     * dados do cartão de crédito
+     * @var array
+     */
+    protected $creditcardData;
 
     /**
      * configurações da compra
@@ -219,6 +219,7 @@ class PagSeguro
      */
     public function setItems(array $items)
     {
+        $itemsPagSeguro = [];
         $i = 1;
         foreach ($items as $value) {
             $itemsPagSeguro['itemId' . $i] = $value['id'];
@@ -228,18 +229,6 @@ class PagSeguro
         }
 
         $this->items = $itemsPagSeguro;
-
-        return $this;
-    }
-
-    /**
-     * define a forma de pagamento
-     * @param string $paymentMethod
-     * @return $this
-     */
-    public function setPaymentMethod($paymentMethod)
-    {
-        $this->paymentMethod = $paymentMethod;
 
         return $this;
     }
@@ -268,12 +257,12 @@ class PagSeguro
         return $this;
     }
 
+
     /**
      * define o valor do frete cobrado
-     * @param float $shippingCost
+     * @param $shippingCost
      * @return $this
      */
-
     public function setShippingCost($shippingCost)
     {
         $this->shippingCost = $shippingCost;
@@ -282,73 +271,25 @@ class PagSeguro
     }
 
     /**
-     * envia a transação para o pagseguro usando as configurações
-     * setadas nos métodos e retorna um array com o resultado
-     * @return array
+     * @param $data
+     * @return mixed
      * @throws \Giovannefc\PagSeguro\PagSeguroException
      */
-    public function send()
-    {
-
-        if (!$this->session->has('pagseguro.senderHash')) {
-            throw new PagSeguroException('SenderHash is not defined', 1);
-        }
-
-        if ($this->reference === null) {
-            $this->reference = rand('1000', '10000');
-        }
-
-        if ($this->shippingCost === null) {
-            $this->shippingCost = '0.00';
-        }
-
-        if ($this->paymentMethod == 'boleto') {
-            $this->paymentSettings = ['paymentMethod' => 'boleto'];
-        } elseif ($this->paymentMethod == 'credit_card') {
-            $this->setCreditCardToken();
-        } else {
-            throw new PagSeguroException('paymentMethod is not valid. Use boleto or credit_card', 1);
-        }
-
-        $config = array(
-            'email' => $this->config->get('pagseguro.email'),
-            'token' => $this->config->get('pagseguro.token'),
-            'paymentMode' => 'default',
-            'receiverEmail' => $this->config->get('pagseguro.email'),
-            'currency' => 'BRL',
-            'reference' => $this->reference,
-            'senderHash' => $this->session->get('pagseguro.senderHash'),
-            'shippingCost' => $this->shippingCost
-        );
-
-        $settings = array_merge($config, $this->senderInfo, $this->senderAddress, $this->items, $this->paymentSettings);
-
-        return $this->http->sendTransaction($settings);
-    }
-
-    /**
-     * define as configurações e o token do cartão de crédito
-     * caso o mesmo seja usado. se esse método não for usado
-     * será assumido o método de pagamento em boleto.
-     */
-    protected function setCreditCardToken()
+    public function sendCreditCard($data)
     {
         if ($this->totalAmount === null) {
             throw new PagSeguroException('For credit_card paymentMethod you need define totalAmount using setTotalAmount() method.', 1);
         }
 
-        if (!$this->session->has('pagseguro.creditCardToken')) {
-            throw new PagSeguroException('creditCardToken is not defined.', 1);
-        }
-
         $this->paymentSettings = array(
             'paymentMethod' => 'credit_card',
-            'creditCardToken' => $this->session->get('pagseguro.creditCardToken'),
+            'senderHash' => $data['senderHash'],
+            'creditCardToken' => $data['cardToken'],
             'installmentQuantity' => '1',
             'installmentValue' => number_format($this->totalAmount, 2, '.', ''),
             'creditCardHolderName' => $this->session->get('pagseguro.holderName'),
             'creditCardHolderCPF' => $this->session->get('pagseguro.holderCpf'),
-            'creditCardHolderBirthDate' => $this->session->get('pagseguro.holderBirthDate'),
+            'creditCardHolderBirthDate' => $data['holderBirthDate'],
             'creditCardHolderAreaCode' => $this->senderInfo['senderAreaCode'],
             'creditCardHolderPhone' => $this->senderInfo['senderPhone'],
             'billingAddressStreet' => $this->senderAddress['shippingAddressStreet'],
@@ -361,7 +302,53 @@ class PagSeguro
             'billingAddressCountry' => 'BRA'
         );
 
-        return $this;
+        return $this->send();
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function send()
+    {
+        $this->validate();
+
+        $config = array(
+            'email' => $this->config->get('pagseguro.email'),
+            'token' => $this->config->get('pagseguro.token'),
+            'paymentMode' => 'default',
+            'receiverEmail' => $this->config->get('pagseguro.email'),
+            'currency' => 'BRL',
+            'reference' => $this->reference,
+            'shippingCost' => $this->shippingCost
+        );
+
+        $settings = array_merge($config, $this->senderInfo, $this->senderAddress, $this->items, $this->paymentSettings);
+
+        return $this->http->sendTransaction($settings);
+    }
+
+    /**
+     * seta valores padrões caso não forem definidos
+     */
+    protected function validate()
+    {
+        if ($this->reference === null) {
+            $this->reference = rand('1000', '10000');
+        }
+
+        if ($this->shippingCost === null) {
+            $this->shippingCost = '0.00';
+        }
+    }
+
+    public function sendBillet($senderHash)
+    {
+        $this->paymentSettings = array(
+            'paymentMethod' => 'boleto',
+            'senderHash' => $senderHash
+        );
+
+        return $this->send();
     }
 
     public function clear()
