@@ -214,7 +214,7 @@ class PagSeguro extends PagSeguroClient
             'installmentQuantity' => '1',
             'installmentValue' => number_format($this->totalAmount, 2, '.', ''),
             'creditCardHolderName' => $data['holderName'],
-            'creditCardHolderCPF' => $data['holderCpf'],
+            'creditCardHolderCPF' => str_replace(['.', '-'], '', $data['holderCpf']),
             'creditCardHolderBirthDate' => $data['holderBirthDate'],
             'creditCardHolderAreaCode' => $this->senderInfo['senderAreaCode'],
             'creditCardHolderPhone' => $this->senderInfo['senderPhone'],

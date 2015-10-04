@@ -9,16 +9,14 @@ class PagSeguroServiceProvider extends ServiceProvider
 	public function register()
 	{
 
-		$this->app['pagseguro'] = $this->app->share(function($app)
+		$this->app->singleton('pagseguro', function($app)
 		{
 			$session = $app['session'];
 			$validator = $app['validator'];
 			$config = $app['config'];
 			$log = $app['log'];
 
-			$http = new \Giovannefc\PagSeguro\PagSeguroClient($session, $config, $log);
-
-			return new \Giovannefc\PagSeguro\PagSeguro($session, $validator, $config, $http);
+			return new \Giovannefc\PagSeguro\PagSeguro($session, $validator, $config, $log);
 		});
 	}
 

@@ -1,6 +1,10 @@
 <?php
 namespace Giovannefc\PagSeguro;
 
+use Illuminate\Session\SessionManager as Session;
+use Illuminate\Validation\Factory as Validator;
+use Illuminate\Config\Repository as Config;
+use Illuminate\Log\Writer as Log;
 
 class PagSeguroConfig
 {
@@ -52,7 +56,7 @@ class PagSeguroConfig
      * @param $config
      * @param $log
      */
-    public function __construct($session, $validator, $config, $log)
+    public function __construct(Session $session, Validator $validator, Config $config, Log $log)
     {
         $this->session = $session;
         $this->validator = $validator;
