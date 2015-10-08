@@ -83,7 +83,6 @@ PagSeguro::setSenderInfo($senderInfo)
 ->setSenderAddress($senderAddress)
 ->setItems($items)
 ->setTotalAmount('120.50')
-->set
 ->sendCreditCard();
 ```
 
