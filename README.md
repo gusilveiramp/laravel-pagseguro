@@ -39,15 +39,19 @@ Isso também fará a publicação de imagens da bandeira do PagSeguro usadas na 
 No arquivo de configuração .env de sua aplicação, coloque as linhas:
 
 ```php
-PAGSEGURO_ENV=sandbox_ou_production
 PAGSEGURO_EMAIL=seu@email.com
-PAGSEGURO_TOKEN=token
+PAGSEGURO_TOKEN_SANDBOX=seu_token_de_testes
+PAGSEGURO_TOKEN_PRODUCTION=seu_token_de_produção
 ```
 
-Onde você escolherá sandbox para testes ou production para produção.
-Coloque seu e-mail da sua conta do PagSeguro e o token.
+Só será assumido o token de produção (production) quando sua aplicação estiver setada/configurada em production no arquivo
+de configuração de ambiente .env, por exemplo:
+```php
+APP_ENV=production
+```
+Qualquer outra configuração, como APP_ENV=local por exemplo, será assumido o token de testes (sandbox).
 
-## Enviado uma transação:
+## Enviando uma transação:
 
 ```php
 $senderInfo = array(
@@ -79,23 +83,31 @@ PagSeguro::setSenderInfo($senderInfo)
 ->setSenderAddress($senderAddress)
 ->setItems($items)
 ->setTotalAmount('120.50')
-->setPaymentMethod('boleto');
-->send();
+->set
+->sendCreditCard();
 ```
 
 ## View
 
 A view contém um formulário para pagamento com cartão de crédito e um botão para pagamento com boleto.
-O código HTML utiliza os padrões CSS do bootstrap. Então para visualizar corretamente é necessário carregar o css em seu template:
+O código HTML utiliza os padrões CSS do bootstrap. Então para visualizar corretamente é necessário carregar o css/js do mesmo em seu template:
 ```php
 https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css
 https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js
 ```
+E claro, não esquecer de carregar o SDK javascript do PagSeguro:
 
-Na sua view (blade), use:
 ```php
-@include('pagseguro::formulario')
+<script src="https://stc.sandbox.pagseguro.uol.com.br/pagseguro/api/v2/checkout/pagseguro.directpayment.js"></script>
+```
+
+Na sua view (blade), para incluir o formulário, use:
+```php
+@include('pagseguro::form')
+```
+E para o javascript:
+```php
 @include('pagseguro::js')
 ```
 
-Em desenvolvimento. Estou criando a documentação aos poucos enquanto vou testando o código.
+*Em desenvolvimento. Estou criando a documentação aos poucos enquanto vou testando o código.

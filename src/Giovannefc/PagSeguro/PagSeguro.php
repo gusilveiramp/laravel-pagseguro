@@ -47,9 +47,9 @@ class PagSeguro extends PagSeguroClient
 
     /**
      * define número máximo de parcelas sem juros
-     * @var
+     * @var int
      */
-    protected $maxNoInterest;
+    protected $maxInstallmentsNoInterest;
 
     /**
      * define os dados do comprador
@@ -179,6 +179,7 @@ class PagSeguro extends PagSeguroClient
 
     /**
      * define um id de referência da compra no pagseguro
+     * default: valor randômico de 1000 a 10000
      * @param string $reference
      * @return $this
      */
@@ -192,12 +193,26 @@ class PagSeguro extends PagSeguroClient
 
     /**
      * define o valor do frete cobrado
+     * default: 0.00
      * @param $shippingCost
      * @return $this
      */
     public function setShippingCost($shippingCost)
     {
         $this->shippingCost = $shippingCost;
+
+        return $this;
+    }
+
+    /**
+     * define o a quantidade máxima de parcelas sem juros
+     * default: 12
+     * @param int $maxInstalmments
+     * @return $this
+     */
+    public function setMaxInstallmentsNoInterest($maxInstalmments)
+    {
+        $this->maxInstallmentsNoInterest = $maxInstalmments;
 
         return $this;
     }
@@ -217,7 +232,7 @@ class PagSeguro extends PagSeguroClient
             'paymentMethod' => 'credit_card',
             'senderHash' => $data['senderHash'],
             'creditCardToken' => $data['cardToken'],
-            'maxInstallmentsNoInterest' => $this->maxNoInterest,
+            'maxInstallmentsNoInterest' => $this->maxInstallmentsNoInterest,
             'noInterestInstallmentQuantity' => $data['installments'],
             'installmentQuantity' => $data['installments'],
             'installmentValue' => number_format($data['installmentAmount'], '2','.',''),
@@ -274,8 +289,8 @@ class PagSeguro extends PagSeguroClient
             $this->shippingCost = '0.00';
         }
 
-        if($this->maxNoInterest === null) {
-            $this->maxNoInterest = 12;
+        if($this->maxInstallmentsNoInterest === null) {
+            $this->maxInstallmentsNoInterest = 12;
         }
     }
 
