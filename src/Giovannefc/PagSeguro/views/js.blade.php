@@ -1,184 +1,130 @@
 <script type="text/javascript">
 
-<!-- Funções para executar a Rota de Pagamento -->
+    {!! PagSeguro::jsSetSessionId() !!}
 
-function confirmBoleto() {
-    $("#confirmBoleto").attr("disabled", "disabled");
-    document.getElementById("loadPagamento").style.display = "block";
-    senderHash = PagSeguroDirectPayment.getSenderHash();
-    $.post("{{ route('PagSeguroAjaxSenderHash') }}", {
-        _token: "{{ csrf_token() }}",
-        data: (senderHash)
-    });
-    setTimeout(function() {
-        window.location.href = "{{ route(PagSeguro::viewSendRoute(), 'boleto') }}";
-    }, 2500);
-}
+    function setSenderHash() {
 
-function confirmCartao() {
-    var parametros = {
+        var form = document.querySelector('#pay');
+        var hash = PagSeguroDirectPayment.getSenderHash();
 
-        cardNumber: $("#cardNumber").val(),
-        brand: (brand),
-        cvv: $("#cvv").val(),
-        expirationMonth: $("#expirationMonth :selected").val(),
-        expirationYear: $("#expirationYear :selected").val(),
-        success: function(data) {
-            $.post("{{ route('PagSeguroAjaxCreditCardToken') }}", {
-                _token: "{{ csrf_token() }}",
-                data: (JSON.stringify(data.card.token).replace(/"/g, ''))
-            });
+        if (document.querySelector("input[name=senderHash]") == null) {
+            var senderHash = document.createElement('input');
+            senderHash.setAttribute('name', "senderHash");
+            senderHash.setAttribute('type', "hidden");
+            senderHash.setAttribute('value', hash);
+
+            form.appendChild(senderHash);
         }
     }
 
-    $("#confirmCartao").attr("disabled", "disabled");
-    document.getElementById("loadPagamento").style.display = "block";
+    function setCardBrand() {
 
-    setSenderHash();
-    setInfoHolder();
-    PagSeguroDirectPayment.createCardToken(parametros);
+        $('#cardNumber').blur(function () {
+            var cardNumber = document.querySelector('#cardNumber').value;
+            if (cardNumber != null) {
+                PagSeguroDirectPayment.getBrand({
+                    cardBin: cardNumber.replace(/ /g, ''),
+                    success: function (data) {
 
-    setTimeout(function() {
-        window.location.href = "{{ route(PagSeguro::viewSendRoute(), 'credit_card') }}";
-    }, 2500);
-}
+                        var form = document.querySelector('#pay');
+                        var brand = JSON.stringify(data.brand.name).replace(/"/g, '');
 
-function setSenderHash() {
-    senderHash = PagSeguroDirectPayment.getSenderHash();
-    setTimeout(function() {
-        $.post("{{ route('PagSeguroAjaxSenderHash') }}", {
-            _token: "{{ csrf_token() }}",
-            data: (senderHash)
-        });
-    }, 1000);
-}
+                        if (document.querySelector("input[name=cardBrand]") == null) {
+                            var cardBrand = document.createElement('input');
+                            cardBrand.setAttribute('name', "cardBrand");
+                            cardBrand.setAttribute('type', "hidden");
+                            cardBrand.setAttribute('value', brand);
 
-function setInfoHolder() {
-    $.post("{{ route('PagSeguroAjaxInfoHolder') }}", {
-        _token: "{{ csrf_token() }}",
-        holderName: $("#holderName").val(),
-        holderCpf: $("#holderCpf").val(),
-        holderBirthDate: $("#holderBirthDate").val()
-    });
-}
-
-window.onload = function() {
-
-    $("#boleto").hide();
-
-    $('a#boletoBtn').click(function() {
-        $("#cartao").hide();
-        $("#boleto").fadeIn(500);
-        $("#boletoNav").addClass('active');
-        $("#cartaoNav").removeClass('active');
-        return false;
-    })
-
-    $('a#cartaoBtn').click(function() {
-        $("#boleto").hide();
-        $("#cartao").fadeIn(500);
-        $("#cartaoNav").addClass('active');
-        $("#boletoNav").removeClass('active');
-
-        return false;
-    })
-
-    {!! PagSeguro::jsSetSessionId() !!}
-
-    $("#cardNumber").blur(function() {
-        var cardNumber = document.getElementById("cardNumber").value;
-        PagSeguroDirectPayment.getBrand({
-            cardBin: cardNumber.replace(/ /g, ''),
-            success: function(data) {
-                brand = JSON.stringify(data.brand.name).replace(/"/g, '');
-                $("#brand").fadeIn(600);
-                $("#brandName").html(brand);
+                            form.appendChild(cardBrand);
+                        } else {
+                            document.querySelector("input[name=cardBrand]").value = brand;
+                        }
+                    }
+                });
             }
         });
+    }
+
+    function setCardToken() {
+
+        var parametros = {
+
+            cardNumber: document.getElementById('cardNumber').value,
+            brand: document.querySelector("input[name=cardBrand]").value,
+            cvv: document.getElementById('cvv').value,
+            expirationMonth: document.querySelector('#expirationMonth option:checked').value,
+            expirationYear: document.querySelector('#expirationYear option:checked').value,
+            success: function (data) {
+
+                var form = document.querySelector('#pay');
+                var token = JSON.stringify(data.card.token).replace(/"/g, '');
+
+                if (document.querySelector("input[name=cardToken]") == null) {
+                    var cardToken = document.createElement('input');
+                    cardToken.setAttribute('name', "cardToken");
+                    cardToken.setAttribute('type', "hidden");
+                    cardToken.setAttribute('value', token);
+
+                    form.appendChild(cardToken);
+                } else {
+                    document.querySelector("input[name=cardToken]").value = token;
+                }
+            },
+            error: function (data) {
+                console.log(JSON.stringify(data));
+            }
+        };
+
+        PagSeguroDirectPayment.createCardToken(parametros);
+    }
+
+    function setInstallmentAmount() {
+
+        var brand = document.querySelector("input[name=cardBrand]").value;
+        var form = document.querySelector('#pay');
+
+        PagSeguroDirectPayment.getInstallments({
+            amount: document.getElementById('amount').value,
+            maxInstallmentNoInterest: 3,
+            brand: brand,
+            success: function (data) {
+                var installment = document.querySelector('#installments option:checked').value;
+                var installments = JSON.parse(JSON.stringify(data))['installments'];
+                var amount = installments[brand][installment - 1]['installmentAmount'];
+
+                if (document.querySelector("input[name=installmentAmount]") == null) {
+                    var installmentAmount = document.createElement('input');
+                    installmentAmount.setAttribute('name', "installmentAmount");
+                    installmentAmount.setAttribute('type', "hidden");
+                    installmentAmount.setAttribute('value', amount);
+
+                    form.appendChild(installmentAmount);
+                } else {
+                    document.querySelector("input[name=installmentAmount]").value = amount;
+                }
+            }
+        });
+    }
+
+    setCardBrand();
+
+    document.querySelector('#pay').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        var form = document.querySelector('#pay');
+
+        setSenderHash();
+        setInstallmentAmount();
+        setCardToken();
+
+        $('#button').attr('disabled', 'disabled');
+        document.getElementById('loading').style.display = 'block';
+
+        setTimeout(function () {
+            form.submit();
+        }, 2000);
+
+        return false;
     });
 
-    $('#formCartao').formValidation({
-        framework: 'bootstrap',
-        icon: {
-            valid: '',
-            invalid: 'glyphicon glyphicon-remove',
-            validating: 'glyphicon glyphicon-refresh'
-        },
-        fields: {
-            cardNumber: {
-                trigger: 'blur',
-                validators: {
-                    notEmpty: {
-                        message: 'Campo obrigatório.'
-                    }
-                }
-            },
-            expirationMonth: {
-                trigger: 'blur',
-                validators: {
-                    notEmpty: {
-                        message: 'Campo obrigatório.'
-                    }
-                }
-            },
-            expirationYear: {
-                trigger: 'blur',
-                validators: {
-                    notEmpty: {
-                        message: 'Campo obrigatório.'
-                    }
-                }
-            },
-            cvv: {
-                trigger: 'blur',
-                validators: {
-                    notEmpty: {
-                        message: 'Campo obrigatório.'
-                    }
-                }
-            },
-            holderName: {
-                trigger: 'blur',
-                validators: {
-                    notEmpty: {
-                        message: 'Campo obrigatório.'
-                    }
-                }
-            },
-            holderBirthDate: {
-                trigger: 'blur',
-                validators: {
-                    notEmpty: {
-                        message: 'Campo obrigatório.'
-                    },
-                    date: {
-                        format: 'DD/MM/YYYY',
-                        message: 'Preenchimento incompleto.'
-                    }
-                }
-            },
-            holderCpf: {
-                trigger: 'blur',
-                validators: {
-                    notEmpty: {
-                        message: 'Campo obrigatório.'
-                    },
-                    id: {
-                        country: 'BR',
-                        message: 'Por favor, digite um CPF válido.'
-                    }
-                }
-            },
-
-        }
-    }).on('success.form.fv', function(e) {
-        e.preventDefault();
-
-        var $form = $(e.target),
-            fv = $(e.target).data('formValidation');
-
-        confirmCartao();
-
-    });
-}
 </script>

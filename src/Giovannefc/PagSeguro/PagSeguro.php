@@ -46,6 +46,12 @@ class PagSeguro extends PagSeguroClient
     protected $paymentSettings;
 
     /**
+     * define número máximo de parcelas sem juros
+     * @var
+     */
+    protected $maxNoInterest;
+
+    /**
      * define os dados do comprador
      * @param array $senderInfo
      * @return $this
@@ -211,8 +217,10 @@ class PagSeguro extends PagSeguroClient
             'paymentMethod' => 'credit_card',
             'senderHash' => $data['senderHash'],
             'creditCardToken' => $data['cardToken'],
-            'installmentQuantity' => '1',
-            'installmentValue' => number_format($this->totalAmount, 2, '.', ''),
+            'maxInstallmentsNoInterest' => $this->maxNoInterest,
+            'noInterestInstallmentQuantity' => $data['installments'],
+            'installmentQuantity' => $data['installments'],
+            'installmentValue' => number_format($data['installmentAmount'], '2','.',''),
             'creditCardHolderName' => $data['holderName'],
             'creditCardHolderCPF' => str_replace(['.', '-'], '', $data['holderCpf']),
             'creditCardHolderBirthDate' => $data['holderBirthDate'],
@@ -264,6 +272,10 @@ class PagSeguro extends PagSeguroClient
 
         if ($this->shippingCost === null) {
             $this->shippingCost = '0.00';
+        }
+
+        if($this->maxNoInterest === null) {
+            $this->maxNoInterest = 12;
         }
     }
 
