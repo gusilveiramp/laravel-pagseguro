@@ -233,7 +233,6 @@ class PagSeguro extends PagSeguroClient
             'senderHash' => $data['senderHash'],
             'creditCardToken' => $data['cardToken'],
             'maxInstallmentsNoInterest' => $this->maxInstallmentsNoInterest,
-            'noInterestInstallmentQuantity' => $data['installments'],
             'installmentQuantity' => $data['installments'],
             'installmentValue' => number_format($data['installmentAmount'], '2','.',''),
             'creditCardHolderName' => $data['holderName'],
