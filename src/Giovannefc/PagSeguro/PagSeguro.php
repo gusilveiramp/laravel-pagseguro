@@ -228,7 +228,7 @@ class PagSeguro extends PagSeguroClient
             throw new PagSeguroException('For credit_card paymentMethod you need define totalAmount using setTotalAmount() method.', 1);
         }
 
-        $this->paymentSettings = array(
+        $paymentSettings = array(
             'paymentMethod' => 'credit_card',
             'senderHash' => $data['senderHash'],
             'creditCardToken' => $data['cardToken'],
@@ -250,6 +250,12 @@ class PagSeguro extends PagSeguroClient
             'billingAddressState' => $this->senderAddress['shippingAddressState'],
             'billingAddressCountry' => 'BRA'
         );
+
+        if ($data['installments'] > 1) {
+            $this->paymentSettings = array_merge($paymentSettings, ['noInterestInstallmentQuantity' => $data['installments']]);
+        } else {
+            $this->paymentSettings = $paymentSettings;
+        }
 
         return $this->send();
     }
