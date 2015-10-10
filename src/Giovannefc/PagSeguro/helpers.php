@@ -14,3 +14,10 @@ if (!function_exists('price_br')) {
 		return number_format($price, '2', ',', '.');
 	}
 }
+
+if (!function_exists('pagseguro_js')) {
+	function pagseguro_js()
+	{
+		return app('pagseguro')->getUrlApiJava();
+	}
+}

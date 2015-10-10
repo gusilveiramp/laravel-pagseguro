@@ -410,6 +410,15 @@ class PagSeguro extends PagSeguroClient
     }
 
     /**
+     * Gera o código html para carregar a API javascript do PagSeguro
+     * @return string
+     */
+    public function getUrlApiJava()
+    {
+        return '<script src="'. $this->url['javascript'] . '"></script>';
+    }
+
+    /**
      * retorna o id da sessão do pagseguro
      * caso ainda não exista, é executado o método
      * setSessionId() e é retornado o id da sessão
