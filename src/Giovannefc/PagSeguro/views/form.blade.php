@@ -95,7 +95,7 @@
                     </button>
                 </p>
                 <div id="loading" style="display: none" class="text-center">
-                    <img src="{{ asset('vendor/pagseguro/images/load-horizontal.gif') }}">
+                    <img src="{{ asset('assets/vendor/pagseguro/images/load-horizontal.gif') }}">
                 </div>
             </div>
         </div>
