@@ -1,6 +1,6 @@
 {
     "name": "giovannefc/laravel-pagseguro",
-    "description": "Laravel 5.1 PagSeguro",
+    "description": "Laravel 5.2 PagSeguro",
     "keywords": ["laravel", "pagseguro"],
     "license": "MIT",
     "authors": [
@@ -11,8 +11,7 @@
     ],
     "require": {
         "php": ">=5.5.9",
-        "laravelcollective/html": "5.1.*",
-        "watson/bootstrap-form": "dev-master"
+        "laravelcollective/html": "5.2.*"
     },
     "autoload": {
         "psr-4": {
