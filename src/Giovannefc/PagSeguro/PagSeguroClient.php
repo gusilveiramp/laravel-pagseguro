@@ -29,8 +29,12 @@ class PagSeguroClient extends PagSeguroConfig
         curl_setopt($ch, CURLOPT_POST, count($credentials));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // para testar em http. Para https, setar para true!
 
         $result = curl_exec($ch);
+        
+        if (FALSE === $result)
+            throw new PagSeguroException(curl_error($ch), curl_errno($ch));
 
         if ($result == 'Unauthorized' || $result == 'Forbidden') {
             throw new PagSeguroException($result . ': Provavelmente você precisa solicitar a liberação do pagamento transparente em sua conta.', 1);
@@ -68,6 +72,7 @@ class PagSeguroClient extends PagSeguroConfig
         curl_setopt($ch, CURLOPT_POST, count($settings));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // para testar em http. Para https, setar para true!
 
         $result = simplexml_load_string(curl_exec($ch));
 
