@@ -29,7 +29,11 @@ class PagSeguroClient extends PagSeguroConfig
         curl_setopt($ch, CURLOPT_POST, count($credentials));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // para testar em http. Para https, setar para true!
+        if(app()->environment() == 'production') {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true); 
+        } else {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        }
 
         $result = curl_exec($ch);
         
@@ -72,7 +76,11 @@ class PagSeguroClient extends PagSeguroConfig
         curl_setopt($ch, CURLOPT_POST, count($settings));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // para testar em http. Para https, setar para true!
+        if(app()->environment() == 'production') {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true); 
+        } else {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        }
 
         $result = simplexml_load_string(curl_exec($ch));
 
