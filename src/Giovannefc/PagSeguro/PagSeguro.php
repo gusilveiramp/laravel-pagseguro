@@ -308,6 +308,17 @@ class PagSeguro extends PagSeguroClient
 
         return $this->send();
     }
+    
+    public function sendEft($data)
+    {
+        $this->paymentSettings = array(
+            'paymentMethod' => 'eft',
+            'bankName' => $data['senderBankName'],
+            'senderHash' => $data['senderHash']
+        );
+
+        return $this->send();
+    }
 
     public function clear()
     {
