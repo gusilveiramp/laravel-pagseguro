@@ -60,18 +60,12 @@ class PagSeguro extends PagSeguroClient
     {
         $senderInfo = $this->validateSenderInfo($senderInfo);
 
-        if (app()->environment('production')) {
-            $senderEmail = $senderInfo['email'];
-        } else {
-            $senderEmail = 'teste@sandbox.pagseguro.com.br';
-        }
-
         $this->senderInfo = array(
             'senderName' => $senderInfo['nome'],
             'senderCPF' => str_replace(['.', '-'], '', $senderInfo['cpf']),
             'senderAreaCode' => explode(' ', $senderInfo['telefone'])[0],
             'senderPhone' => explode(' ', $senderInfo['telefone'])[1],
-            'senderEmail' => $senderEmail
+            'senderEmail' => $senderInfo['email']
         );
 
         return $this;
